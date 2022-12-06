@@ -34,17 +34,33 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Honeypot;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.audio.Sample;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Healing;
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 
 public class ElixirOfHoneyedHealing extends Elixir {
 	
 	{
 		image = ItemSpriteSheet.ELIXIR_HONEY;
 	}
+
+	public static void honeyedHeal( Char ch ){
+		if (ch == Dungeon.hero && Dungeon.isChallenged(Challenges.NO_HEALING)){
+			// heal 35 health flat
+			Buff.affect(ch, Healing.class).setHeal((int) (35), 0.125f, 0);
+			if (ch == Dungeon.hero){
+				GLog.p( Messages.get(PotionOfHealing.class, "heal") );
+			}
+		} else {
+			PotionOfHealing.heal(ch);
+		}
+	}
 	
 	@Override
 	public void apply(Hero hero) {
 		PotionOfHealing.cure(hero);
-		PotionOfHealing.heal(hero);
+		honeyedHeal(hero);
 		Talent.onHealingPotionUsed( hero );
 		Buff.affect(hero, Hunger.class).satisfy(Hunger.HUNGRY/2f);
 		Talent.onFoodEaten(hero, Hunger.HUNGRY/2f, this);
@@ -60,7 +76,7 @@ public class ElixirOfHoneyedHealing extends Elixir {
 		Char ch = Actor.findChar(cell);
 		if (ch != null){
 			PotionOfHealing.cure(ch);
-			PotionOfHealing.heal(ch);
+			honeyedHeal(ch);
 			if (ch instanceof Bee && ch.alignment != curUser.alignment){
 				ch.alignment = Char.Alignment.ALLY;
 				((Bee)ch).setPotInfo(-1, null);

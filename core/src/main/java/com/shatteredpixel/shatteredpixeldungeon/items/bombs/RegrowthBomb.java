@@ -38,6 +38,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.BArray;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 
 import java.util.ArrayList;
 
@@ -69,9 +70,14 @@ public class RegrowthBomb extends Bomb {
 				int t = Dungeon.level.map[i];
 				if (ch != null){
 					if (ch.alignment == Dungeon.hero.alignment) {
-						//same as a healing potion
 						PotionOfHealing.cure(ch);
-						PotionOfHealing.heal(ch);
+
+						if(Dungeon.isChallenged(Challenges.NO_HEALING)) {
+							PotionOfHealing.safeHeal(ch, 0.3f, 1f);
+						}
+						else {
+							PotionOfHealing.heal(ch);
+						}
 					}
 				} else if ((t == Terrain.EMPTY || t == Terrain.EMPTY_DECO || t == Terrain.EMBERS
 						|| t == Terrain.GRASS || t == Terrain.FURROWED_GRASS || t == Terrain.HIGH_GRASS)

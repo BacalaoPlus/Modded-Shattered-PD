@@ -51,6 +51,8 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndUseItem;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Reflection;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 
 import java.util.ArrayList;
 
@@ -96,6 +98,8 @@ public class Blandfruit extends Food {
 		if (action.equals( AC_EAT ) && potionAttrib == null) {
 
 			GLog.w( Messages.get(this, "raw"));
+			Buff.affect(hero, Hunger.class).satisfy(Hunger.HUNGRY/2f);
+			Talent.onFoodEaten(hero, Hunger.HUNGRY/2f, this);
 			return;
 
 		}
@@ -104,7 +108,20 @@ public class Blandfruit extends Food {
 
 		if (action.equals( AC_EAT ) && potionAttrib != null){
 
-			potionAttrib.apply(hero);
+			if(Dungeon.isChallenged(Challenges.NO_HEALING) && potionAttrib instanceof PotionOfHealing) {
+
+				PotionOfHealing.cure(hero);
+				PotionOfHealing.safeHeal(hero, 0.8f * hero.HT + 14, 0.125f);
+				Talent.onHealingPotionUsed( hero );
+				Buff.affect(hero, Hunger.class).satisfy(Hunger.HUNGRY/2f);
+				Talent.onFoodEaten(hero, Hunger.HUNGRY/2f, this);
+
+			}
+			else {
+				potionAttrib.apply(hero);
+				Buff.affect(hero, Hunger.class).satisfy(Hunger.HUNGRY/2f);
+				Talent.onFoodEaten(hero, Hunger.HUNGRY/2f, this);
+			}
 
 		}
 	}

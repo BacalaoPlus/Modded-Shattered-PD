@@ -57,6 +57,14 @@ public class PotionOfHealing extends Potion {
 		Talent.onHealingPotionUsed( hero );
 	}
 
+	public static void safeHeal( Char ch, float amount, float percentPerTick ) {
+		Buff.affect(ch, Healing.class).setHeal((int) (amount), percentPerTick, 0);
+
+		if (ch == Dungeon.hero) {
+			GLog.p( Messages.get(PotionOfHealing.class, "heal") );
+		}
+	}
+
 	public static void heal( Char ch ){
 		if (ch == Dungeon.hero && Dungeon.isChallenged(Challenges.NO_HEALING)){
 			pharmacophobiaProc(Dungeon.hero);
