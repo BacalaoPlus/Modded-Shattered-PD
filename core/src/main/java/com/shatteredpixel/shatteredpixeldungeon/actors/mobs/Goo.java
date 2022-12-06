@@ -47,11 +47,20 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.GameMath;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
+import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 
 public class Goo extends Mob {
 
+	private float growingFactor;
+	boolean hasAttacked = false;
+
 	{
-		HP = HT = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 120 : 100;
+		HP = HT = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 100 : 100;
+		growingFactor = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 1.05f : 1;
+		baseSpeed = growingFactor;
+
 		EXP = 10;
 		defenseSkill = 8;
 		spriteClass = GooSprite.class;
@@ -115,9 +124,16 @@ public class Goo extends Mob {
 			if (Dungeon.level.heroFOV[pos] ){
 				sprite.emitter().burst( Speck.factory( Speck.HEALING ), healInc );
 			}
-			if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES) && healInc < 3) {
-				healInc++;
+			if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES)) {
+				growingFactor += .01f;
+				baseSpeed = growingFactor;
+
+				Level.set( pos, Terrain.EMPTY );
+				GameScene.updateMap(pos);
+
+				//if(healInc < 3)	healInc++;
 			}
+
 			if (HP*2 > HT) {
 				BossHealthBar.bleed(false);
 				((GooSprite)sprite).spray(false);
@@ -173,6 +189,7 @@ public class Goo extends Mob {
 
 	@Override
 	protected boolean doAttack( Char enemy ) {
+		//mid-charge pump up
 		if (pumpedUp == 1) {
 			pumpedUp++;
 			((GooSprite)sprite).pumpUp( pumpedUp );
@@ -180,16 +197,22 @@ public class Goo extends Mob {
 			spend( attackDelay() );
 
 			return true;
-		} else if (pumpedUp >= 2 || Random.Int( (HP*2 <= HT) ? 2 : 5 ) > 0) {
+
+		//pump up or normal attack
+		} else if (pumpedUp >= 2 || Random.Int( (HP*2 <= HT) ? 2 : 5 ) > 0 || !hasAttacked) {
 
 			boolean visible = Dungeon.level.heroFOV[pos];
 
 			if (visible) {
+				//pump up
 				if (pumpedUp >= 2) {
 					((GooSprite) sprite).pumpAttack();
+				//normal attack
 				} else {
 					sprite.attack(enemy.pos);
+					hasAttacked = true;
 				}
+			//prepare pump up
 			} else {
 				if (pumpedUp >= 2){
 					((GooSprite)sprite).triggerEmitters();
@@ -201,7 +224,7 @@ public class Goo extends Mob {
 
 			return !visible;
 
-		} else {
+		} else if (hasAttacked) {
 
 			if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES)){
 				pumpedUp += 2;
@@ -221,6 +244,9 @@ public class Goo extends Mob {
 
 			return true;
 		}
+		else {
+			return true;
+		}
 	}
 
 	@Override
@@ -238,6 +264,9 @@ public class Goo extends Mob {
 
 	@Override
 	protected boolean getCloser( int target ) {
+
+		hasAttacked = false;
+
 		if (pumpedUp != 0) {
 			pumpedUp = 0;
 			sprite.idle();
@@ -338,6 +367,17 @@ public class Goo extends Mob {
 		if ((HP*2 <= HT)) BossHealthBar.bleed(true);
 
 		healInc = bundle.getInt(HEALINC);
+	}
+
+	@Override
+	public String info(){
+		String desc = description();
+
+		if(Dungeon.isChallenged(Challenges.STRONGER_BOSSES)) {
+			desc += "\n\n" + Messages.get(this, "speed_desc", (int)(100*(growingFactor + 0.001f - 1)));
+		}
+
+		return desc;
 	}
 	
 }
