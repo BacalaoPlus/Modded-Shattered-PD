@@ -36,6 +36,8 @@ import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesight;
 
 public abstract class ChampionEnemy extends Buff {
 
@@ -86,25 +88,28 @@ public abstract class ChampionEnemy extends Buff {
 	}
 
 	public static void rollForChampion(Mob m){
-		if (Dungeon.mobsToChampion <= 0) Dungeon.mobsToChampion = 8;
+		if (Dungeon.mobsToChampion <= 0) Dungeon.mobsToChampion = 6;
 
 		Dungeon.mobsToChampion--;
 
 		//we roll for a champion enemy even if we aren't spawning one to ensure that
 		//mobsToChampion does not affect levelgen RNG (number of calls to Random.Int() is constant)
 		Class<?extends ChampionEnemy> buffCls;
-		switch (Random.Int(6)){
+		switch (Random.Int(5)){
 			case 0: default:    buffCls = Blazing.class;      break;
 			case 1:             buffCls = Projecting.class;   break;
 			case 2:             buffCls = AntiMagic.class;    break;
 			case 3:             buffCls = Giant.class;        break;
-			case 4:             buffCls = Blessed.class;      break;
-			case 5:             buffCls = Growing.class;      break;
+			//case 4:             buffCls = Blessed.class;      break;
+			case 4:             buffCls = Growing.class;      break;
 		}
 
 		if (Dungeon.mobsToChampion <= 0 && Dungeon.isChallenged(Challenges.CHAMPION_ENEMIES)) {
 			Buff.affect(m, buffCls);
 			m.state = m.WANDERING;
+
+			Buff.append(Dungeon.hero, TalismanOfForesight.CharAwareness.class, 3).charID = m.id();
+			Dungeon.hero.resting = false;
 		}
 	}
 
@@ -185,7 +190,12 @@ public abstract class ChampionEnemy extends Buff {
 
 		@Override
 		public float damageTakenFactor() {
-			return 0.25f;
+			return 0.5f;
+		}
+
+		@Override
+		public float meleeDamageFactor() {
+			return 1.5f;
 		}
 
 		@Override
@@ -224,12 +234,12 @@ public abstract class ChampionEnemy extends Buff {
 			color = 0xFF0000;
 		}
 
-		private float multiplier = 1.19f;
+		private float multiplier = 1.2f;
 
 		@Override
 		public boolean act() {
 			multiplier += 0.01f;
-			spend(3*TICK);
+			spend(2*TICK);
 			return true;
 		}
 
