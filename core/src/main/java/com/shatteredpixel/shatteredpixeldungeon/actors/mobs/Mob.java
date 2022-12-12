@@ -791,7 +791,7 @@ public abstract class Mob extends Char {
 			if (Random.Float() < lootChance()) {
 				Item loot = createLoot();
 				if (loot != null) {
-					Dungeon.level.drop(loot, pos).sprite.drop();
+					Dungeon.level.drop(loot, pos);
 				}
 			}
 		}
@@ -803,14 +803,14 @@ public abstract class Mob extends Char {
 			else if (properties.contains(Property.MINIBOSS)) rolls = 5;
 			ArrayList<Item> bonus = RingOfWealth.tryForBonusDrop(Dungeon.hero, rolls);
 			if (bonus != null && !bonus.isEmpty()) {
-				for (Item b : bonus) Dungeon.level.drop(b, pos).sprite.drop();
+				for (Item b : bonus) Dungeon.level.drop(b, pos);
 				RingOfWealth.showFlareForBonusDrop(sprite);
 			}
 		}
 		
 		//lucky enchant logic
 		if (buff(Lucky.LuckProc.class) != null){
-			Dungeon.level.drop(buff(Lucky.LuckProc.class).genLoot(), pos).sprite.drop();
+			Dungeon.level.drop(buff(Lucky.LuckProc.class).genLoot(), pos);
 			Lucky.showFlare(sprite);
 		}
 

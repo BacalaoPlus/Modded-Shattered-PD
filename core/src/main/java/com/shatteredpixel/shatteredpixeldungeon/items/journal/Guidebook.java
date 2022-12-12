@@ -39,7 +39,7 @@ public class Guidebook extends Item {
 	}
 
 	@Override
-	public final boolean doPickUp(Hero hero, int pos) {
+	public final boolean doPickUp(Hero hero) {
 		Document.ADVENTURERS_GUIDE.findPage(Document.GUIDE_INTRO);
 		Document.ADVENTURERS_GUIDE.findPage(Document.GUIDE_EXAMINING);
 		Document.ADVENTURERS_GUIDE.findPage(Document.GUIDE_SURPRISE_ATKS);
@@ -47,14 +47,14 @@ public class Guidebook extends Item {
 		Document.ADVENTURERS_GUIDE.findPage(Document.GUIDE_FOOD);
 		Document.ADVENTURERS_GUIDE.findPage(Document.GUIDE_DIEING);
 
-		GameScene.pickUpJournal(this, pos);
+		GameScene.pickUpJournal(this, hero.pos);
 		//we do this here so the pickup message appears before the tutorial text
 		GameLog.wipe();
 		GLog.i( Messages.capitalize(Messages.get(Hero.class, "you_now_have", name())) );
 		GLog.p(Messages.get(GameScene.class, "tutorial_guidebook"));
 		GameScene.flashForDocument(Document.ADVENTURERS_GUIDE, Document.GUIDE_INTRO);
 		Sample.INSTANCE.play( Assets.Sounds.ITEM );
-		hero.spendAndNext( TIME_TO_PICK_UP );
+		hero.spendAndNext( Hero.TIME_TO_PICK_UP );
 		return true;
 	}
 

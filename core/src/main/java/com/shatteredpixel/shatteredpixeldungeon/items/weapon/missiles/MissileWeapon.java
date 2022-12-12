@@ -287,7 +287,7 @@ abstract public class MissileWeapon extends Weapon {
 					return;
 				}
 			}
-			Dungeon.level.drop( this, cell ).sprite.drop();
+			Dungeon.level.drop( this, cell );
 		}
 	}
 	
@@ -406,9 +406,9 @@ abstract public class MissileWeapon extends Weapon {
 	}
 	
 	@Override
-	public boolean doPickUp(Hero hero, int pos) {
+	public boolean doPickUp(Hero hero) {
 		parent = null;
-		return super.doPickUp(hero, pos);
+		return super.doPickUp(hero);
 	}
 	
 	@Override

@@ -874,10 +874,12 @@ public abstract class Level implements Bundlable {
 			//create a dummy heap, give it a dummy sprite, don't add it to the game, and return it.
 			//effectively nullifies whatever the logic calling this wants to do, including dropping items.
 			Heap heap = new Heap();
-			ItemSprite sprite = heap.sprite = new ItemSprite();
-			sprite.link(heap);
-			return heap;
 
+			ItemSprite sprite = heap.sprite = new ItemSprite();
+
+			sprite.link(heap);
+
+			return heap;
 		}
 		
 		Heap heap = heaps.get( cell );
@@ -910,6 +912,9 @@ public abstract class Level implements Bundlable {
 		if (Dungeon.level != null && ShatteredPixelDungeon.scene() instanceof GameScene) {
 			pressCell( cell );
 		}
+
+		if(heap.sprite != null)
+			heap.sprite.drop(cell);
 		
 		return heap;
 	}

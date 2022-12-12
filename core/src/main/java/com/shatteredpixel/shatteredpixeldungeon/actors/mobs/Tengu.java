@@ -217,7 +217,7 @@ public class Tengu extends Mob {
 	public void die( Object cause ) {
 		
 		if (Dungeon.hero.subClass == HeroSubClass.NONE) {
-			Dungeon.level.drop( new TengusMask(), pos ).sprite.drop();
+			Dungeon.level.drop( new TengusMask(), pos );
 		}
 		
 		GameScene.bossSlain();
@@ -707,7 +707,7 @@ public class Tengu extends Mob {
 			}
 			
 			@Override
-			public boolean doPickUp(Hero hero, int pos) {
+			public boolean doPickUp(Hero hero) {
 				GLog.w( Messages.get(this, "cant_pickup") );
 				return false;
 			}
@@ -1090,7 +1090,7 @@ public class Tengu extends Mob {
 			}
 			
 			@Override
-			public boolean doPickUp(Hero hero, int pos) {
+			public boolean doPickUp(Hero hero) {
 				GLog.w( Messages.get(this, "cant_pickup") );
 				return false;
 			}

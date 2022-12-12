@@ -33,7 +33,7 @@ public class BlandfruitBush extends Plant {
 
 	@Override
 	public void activate( Char ch ) {
-		Dungeon.level.drop( new Blandfruit(), pos ).sprite.drop();
+		Dungeon.level.drop( new Blandfruit(), pos );
 	}
 
 	//seed is never dropped

@@ -473,7 +473,7 @@ public class DriedRose extends Artifact {
 		}
 
 		@Override
-		public boolean doPickUp(Hero hero, int pos) {
+		public boolean doPickUp(Hero hero) {
 			DriedRose rose = hero.belongings.getItem( DriedRose.class );
 
 			if (rose == null){
@@ -481,7 +481,7 @@ public class DriedRose extends Artifact {
 				return false;
 			} if ( rose.level() >= rose.levelCap ){
 				GLog.i( Messages.get(this, "no_room") );
-				hero.spendAndNext(TIME_TO_PICK_UP);
+				hero.spendAndNext(Hero.TIME_TO_PICK_UP);
 				return true;
 			} else {
 
@@ -492,8 +492,8 @@ public class DriedRose extends Artifact {
 					GLog.i( Messages.get(this, "levelup") );
 
 				Sample.INSTANCE.play( Assets.Sounds.DEWDROP );
-				GameScene.pickUp(this, pos);
-				hero.spendAndNext(TIME_TO_PICK_UP);
+				GameScene.pickUp(this, hero.pos);
+				hero.spendAndNext(Hero.TIME_TO_PICK_UP);
 				return true;
 
 			}

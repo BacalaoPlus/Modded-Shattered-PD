@@ -156,8 +156,8 @@ public class Honeypot extends Item {
 		}
 
 		@Override
-		public boolean doPickUp(Hero hero, int pos) {
-			if ( super.doPickUp(hero, pos) ){
+		public boolean doPickUp(Hero hero) {
+			if ( super.doPickUp(hero) ){
 				pickupPot( hero );
 				return true;
 			} else {

@@ -346,9 +346,9 @@ public class WandOfRegrowth extends Wand {
 			for (int i = 0; i < nDrops && !candidates.isEmpty(); i++){
 				Integer c = Random.element(candidates);
 				if (Dungeon.level.heaps.get(c) == null) {
-					Dungeon.level.drop(new Dewdrop(), c).sprite.drop(pos);
+					Dungeon.level.drop(new Dewdrop(), c);
 				} else {
-					Dungeon.level.drop(new Dewdrop(), c).sprite.drop(c);
+					Dungeon.level.drop(new Dewdrop(), c);
 				}
 				candidates.remove(c);
 			}
@@ -385,7 +385,7 @@ public class WandOfRegrowth extends Wand {
 
 			for (int i = 0; i < nSeeds && !candidates.isEmpty(); i++){
 				Integer c = Random.element(candidates);
-				Dungeon.level.drop(Generator.randomUsingDefaults(Generator.Category.SEED), c).sprite.drop(pos);
+				Dungeon.level.drop(Generator.randomUsingDefaults(Generator.Category.SEED), c);
 				candidates.remove(c);
 			}
 

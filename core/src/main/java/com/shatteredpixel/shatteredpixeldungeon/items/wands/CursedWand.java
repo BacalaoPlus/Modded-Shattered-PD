@@ -435,7 +435,7 @@ public class CursedWand {
 				} else {
 					GLog.w( Messages.get(CursedWand.class, "transmogrify_other") );
 				}
-				Dungeon.level.drop(result, user.pos).sprite.drop();
+				Dungeon.level.drop(result, user.pos);
 				return true;
 		}
 	}

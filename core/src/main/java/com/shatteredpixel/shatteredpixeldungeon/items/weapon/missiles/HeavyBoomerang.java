@@ -127,9 +127,9 @@ public class HeavyBoomerang extends MissileWeapon {
 											if (returnTarget == target){
 												if (target instanceof Hero && boomerang.doPickUp((Hero) target)) {
 													//grabbing the boomerang takes no time
-													((Hero) target).spend(-TIME_TO_PICK_UP);
+													((Hero) target).spend(-Hero.TIME_TO_PICK_UP);
 												} else {
-													Dungeon.level.drop(boomerang, returnPos).sprite.drop();
+													Dungeon.level.drop(boomerang, returnPos);
 												}
 												
 											} else if (returnTarget != null){
@@ -138,11 +138,11 @@ public class HeavyBoomerang extends MissileWeapon {
 													boomerang.decrementDurability();
 												}
 												if (boomerang.durability > 0) {
-													Dungeon.level.drop(boomerang, returnPos).sprite.drop();
+													Dungeon.level.drop(boomerang, returnPos);
 												}
 												
 											} else {
-												Dungeon.level.drop(boomerang, returnPos).sprite.drop();
+												Dungeon.level.drop(boomerang, returnPos);
 											}
 											CircleBack.this.next();
 										}

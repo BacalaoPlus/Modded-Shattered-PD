@@ -92,7 +92,7 @@ public abstract class TippedDart extends Dart {
 						hero.sprite.operate(hero.pos);
 					} else if (index == 1){
 						detach(hero.belongings.backpack);
-						if (!new Dart().collect()) Dungeon.level.drop(new Dart(), hero.pos).sprite.drop();
+						if (!new Dart().collect()) Dungeon.level.drop(new Dart(), hero.pos);
 
 						//reset durability if there are darts left in the stack
 						durability = MAX_DURABILITY;
@@ -125,7 +125,7 @@ public abstract class TippedDart extends Dart {
 					return;
 				}
 			}
-			Dungeon.level.drop( d, enemy.pos ).sprite.drop();
+			Dungeon.level.drop( d, enemy.pos );
 		}
 	}
 

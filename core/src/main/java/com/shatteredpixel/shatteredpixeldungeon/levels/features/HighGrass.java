@@ -53,7 +53,8 @@ public class HighGrass {
 	private static boolean freezeTrample = false;
 
 	public static void trample( Level level, int pos ) {
-		
+		boolean trampledItem = false;
+
 		if (freezeTrample) return;
 		
 		Char ch = Actor.findChar(pos);
@@ -65,7 +66,6 @@ public class HighGrass {
 			} else {
 				Level.set(pos, Terrain.GRASS);
 			}
-			
 		} else {
 			if (ch instanceof Hero && ((Hero) ch).heroClass == HeroClass.HUNTRESS){
 				Level.set(pos, Terrain.FURROWED_GRASS);
@@ -73,7 +73,7 @@ public class HighGrass {
 			} else {
 				Level.set(pos, Terrain.GRASS);
 			}
-			
+
 			int naturalismLevel = 0;
 			
 			if (ch != null) {
@@ -114,7 +114,8 @@ public class HighGrass {
 
 						if (droppingBerry) {
 							dropped.countUp(1);
-							level.drop(new Berry(), pos).sprite.drop();
+							level.drop(new Berry(), pos);
+							trampledItem = true;
 						}
 					}
 
@@ -124,12 +125,14 @@ public class HighGrass {
 			if (naturalismLevel >= 0) {
 				// Seed, scales from 1/25 to 1/9
 				if (Random.Int(25 - (naturalismLevel * 4)) == 0) {
-					level.drop(Generator.random(Generator.Category.SEED), pos).sprite.drop();
+					level.drop(Generator.random(Generator.Category.SEED), pos);
+					trampledItem = true;
 				}
 				
 				// Dew, scales from 1/6 to 1/4
 				if (Random.Int(6 - naturalismLevel/2) == 0) {
-					level.drop(new Dewdrop(), pos).sprite.drop();
+					level.drop(new Dewdrop(), pos);
+					trampledItem = true;
 				}
 			}
 
@@ -160,6 +163,10 @@ public class HighGrass {
 			
 			CellEmitter.get(pos).burst(LeafParticle.LEVEL_SPECIFIC, 4);
 			if (Dungeon.level.heroFOV[pos]) Dungeon.observe();
+		}
+
+		if (ch instanceof Hero) {
+			Dungeon.hero.trampledItemLast = trampledItem;
 		}
 	}
 }

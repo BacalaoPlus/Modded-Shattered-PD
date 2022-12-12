@@ -141,7 +141,7 @@ public class WndTradeItem extends WndInfoItem {
 						hide();
 
 						if (!item.doPickUp(hero)) {
-							Dungeon.level.drop(item, heap.pos).sprite.drop();
+							Dungeon.level.drop(item, heap.pos);
 						}
 					} else {
 						for (Mob mob : Dungeon.level.mobs) {
@@ -218,7 +218,7 @@ public class WndTradeItem extends WndInfoItem {
 		Dungeon.gold -= price;
 		
 		if (!item.doPickUp( Dungeon.hero )) {
-			Dungeon.level.drop( item, heap.pos ).sprite.drop();
+			Dungeon.level.drop( item, heap.pos );
 		}
 	}
 }

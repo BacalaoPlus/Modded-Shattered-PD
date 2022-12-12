@@ -46,18 +46,18 @@ public class Dewdrop extends Item {
 	}
 	
 	@Override
-	public boolean doPickUp(Hero hero, int pos) {
+	public boolean doPickUp(Hero hero) {
 		
 		Waterskin flask = hero.belongings.getItem( Waterskin.class );
 		
 		if (flask != null && !flask.isFull()){
 
 			flask.collectDew( this );
-			GameScene.pickUp( this, pos );
+			GameScene.pickUp( this, hero.pos );
 
 		} else {
 
-			int terr = Dungeon.level.map[pos];
+			int terr = Dungeon.level.map[hero.pos];
 			if (!consumeDew(1, hero, terr == Terrain.ENTRANCE|| terr == Terrain.EXIT || terr == Terrain.UNLOCKED_EXIT)){
 				return false;
 			}
@@ -65,7 +65,7 @@ public class Dewdrop extends Item {
 		}
 		
 		Sample.INSTANCE.play( Assets.Sounds.DEWDROP );
-		hero.spendAndNext( TIME_TO_PICK_UP );
+		hero.spendAndNext( Hero.TIME_TO_PICK_UP );
 		
 		return true;
 	}

@@ -177,7 +177,7 @@ public abstract class Char extends Actor {
 			} while (!Dungeon.level.passable[n] && !Dungeon.level.avoid[n]);
 			Item item = heap.peek();
 			if (!(item instanceof Tengu.BombAbility.BombItem || item instanceof Tengu.ShockerAbility.ShockerItem)){
-				Dungeon.level.drop( heap.pickUp(), n ).sprite.drop( pos );
+				Dungeon.level.drop( heap.pickUp(), n );
 			}
 		}
 	}

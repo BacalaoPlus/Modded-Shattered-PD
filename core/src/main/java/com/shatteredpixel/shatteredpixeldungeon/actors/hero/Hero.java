@@ -73,6 +73,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap.Type;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
@@ -166,7 +167,10 @@ public class Hero extends Char {
 		
 		alignment = Alignment.ALLY;
 	}
-	
+
+	//DEBUGGING
+	public int DEBUG = 0;
+
 	public static final int MAX_LEVEL = 30;
 
 	public static final int STARTING_STR = 10;
@@ -174,7 +178,11 @@ public class Hero extends Char {
 	private static final float TIME_TO_REST		    = 1f;
 	private static final float TIME_TO_SEARCH	    = 2f;
 	private static final float HUNGER_FOR_SEARCH	= 6f;
-	
+
+	public static final float TIME_TO_THROW			= 1.0f;
+	public static final float TIME_TO_PICK_UP		= 1.0f;
+	public static final float TIME_TO_DROP			= 1.0f;
+
 	public HeroClass heroClass = HeroClass.ROGUE;
 	public HeroSubClass subClass = HeroSubClass.NONE;
 	public ArmorAbility armorAbility = null;
@@ -200,7 +208,7 @@ public class Hero extends Char {
 	public float awareness;
 	
 	public int lvl = 1;
-	public int exp = 0;
+	public static int exp = 0;
 	
 	public int HTBoost = 0;
 	
@@ -209,6 +217,8 @@ public class Hero extends Char {
 	//This list is maintained so that some logic checks can be skipped
 	// for enemies we know we aren't seeing normally, resulting in better performance
 	public ArrayList<Mob> mindVisionEnemies = new ArrayList<>();
+
+	public boolean trampledItemLast = false;
 
 	public Hero() {
 		super();
@@ -427,7 +437,33 @@ public class Hero extends Char {
 			return 0;
 		}
 	}
-	
+
+	public void dropItem(Item item) {
+		spendAndNext(TIME_TO_DROP);
+
+		item.detachAll(belongings.backpack, false);
+		Heap heap = Dungeon.level.drop(item, pos);
+	}
+
+	//TODO MODDED fix me dewdrops and keys dont get picked up properly
+	public boolean pickUpItem(Item item, boolean interrupt) {
+		if (item.collect( belongings.backpack )) {
+
+			GameScene.pickUp( item, pos );
+			Sample.INSTANCE.play( Assets.Sounds.ITEM );
+
+			if(interrupt)
+				spendAndNext( TIME_TO_PICK_UP );
+			else
+				spend( TIME_TO_PICK_UP );
+
+			return true;
+
+		} else {
+			return false;
+		}
+	}
+
 	public boolean shoot( Char enemy, MissileWeapon wep ) {
 
 		this.enemy = enemy;
@@ -778,12 +814,15 @@ public class Hero extends Char {
 			return true;
 
 		//Hero moves in place if there is grass to trample
-		} else if (isStandingOnTrampleableGrass()){
-			Dungeon.level.pressCell(pos);
-			spendAndNext( 1 / speed() );
-			return false;
 		} else {
-			ready();
+			if (isStandingOnTrampleableGrass()) {
+				Dungeon.level.pressCell(pos);
+				spend(1 / speed());
+				//return true;
+			} else {
+				ready();
+			}
+
 			return false;
 		}
 	}
@@ -867,7 +906,7 @@ public class Hero extends Char {
 	}
 
 	//used to keep track if the wait/pickup action was used
-	// so that the hero spends a turn even if the fail to pick up an item
+	// so that the hero spends a turn even if they fail to pick up an item
 	public boolean waitOrPickup = false;
 
 	private boolean actPickUp( HeroAction.PickUp action ) {
@@ -877,7 +916,7 @@ public class Hero extends Char {
 			Heap heap = Dungeon.level.heaps.get( pos );
 			if (heap != null) {
 				Item item = heap.peek();
-				if (item.doPickUp( this )) {
+				if (pickUpItem( item, true )) {
 					heap.pickUp();
 
 					if (item instanceof Dewdrop
@@ -1364,15 +1403,39 @@ public class Hero extends Char {
 	public boolean justMoved = false;
 	
 	private boolean getCloser( final int target ) {
+		//if hero trampled an item from grass last move, pick it up
+		if (trampledItemLast && visibleEnemies.size() == 0) {
+
+			trampledItemLast = false;
+			justMoved = false;
+
+			Heap heap = Dungeon.level.heaps.get(Dungeon.hero.pos);
+			Item item = heap.peek();
+
+			Waterskin waterskin = belongings.getItem(Waterskin.class);
+
+			if (item instanceof Dewdrop && waterskin.isFull()) {
+				//do nothing
+			} else {
+				//pick up item
+
+				pickUpItem(item, false);
+				heap.pickUp();
+			}
+
+			return true;
+		}
 
 		if (target == pos)
 			return false;
 
 		if (rooted) {
 			Camera.main.shake( 1, 1f );
+			//TODO MODDED spend turn
+			//spend(1);
 			return false;
 		}
-		
+
 		int step = -1;
 		
 		if (Dungeon.level.adjacent( pos, target )) {
@@ -1393,6 +1456,7 @@ public class Hero extends Char {
 					step = target;
 				}
 				if (walkingToVisibleTrapInFog
+						//TODO MODDED make a warning message
 						&& Dungeon.level.traps.get(target) != null
 						&& Dungeon.level.traps.get(target).visible){
 					return false;
@@ -1443,7 +1507,7 @@ public class Hero extends Char {
 			}
 
 			float speed = speed();
-			
+
 			sprite.move(pos, step);
 			move(step);
 
@@ -1463,7 +1527,7 @@ public class Hero extends Char {
 	}
 	
 	public boolean handle( int cell ) {
-		
+
 		if (cell == -1) {
 			return false;
 		}
@@ -1784,7 +1848,7 @@ public class Hero extends Char {
 			}
 
 			Item item = Random.element( items );
-			Dungeon.level.drop( item, cell ).sprite.drop( pos );
+			Dungeon.level.drop( item, cell );
 			items.remove( item );
 		}
 

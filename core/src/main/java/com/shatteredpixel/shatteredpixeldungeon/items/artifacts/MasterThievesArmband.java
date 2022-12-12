@@ -166,9 +166,9 @@ public class MasterThievesArmband extends Artifact {
 								} else {
 									if (loot.doPickUp(curUser)) {
 										//item collection happens instantly
-										curUser.spend(-TIME_TO_PICK_UP);
+										curUser.spend(-Hero.TIME_TO_PICK_UP);
 									} else {
-										Dungeon.level.drop(loot, curUser.pos).sprite.drop();
+										Dungeon.level.drop(loot, curUser.pos);
 									}
 									GLog.i(Messages.get(MasterThievesArmband.class, "stole_item", loot.name()));
 									Buff.affect(ch, StolenTracker.class).setItemStolen(true);

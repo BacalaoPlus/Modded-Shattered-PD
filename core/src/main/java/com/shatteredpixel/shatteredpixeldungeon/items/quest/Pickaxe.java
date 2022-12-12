@@ -123,7 +123,7 @@ public class Pickaxe extends Weapon {
 							if (gold.doPickUp( Dungeon.hero )) {
 								GLog.i( Messages.capitalize(Messages.get(Dungeon.hero, "you_now_have", gold.name())) );
 							} else {
-								Dungeon.level.drop( gold, hero.pos ).sprite.drop();
+								Dungeon.level.drop( gold, hero.pos );
 							}
 							
 							hero.onOperateComplete();

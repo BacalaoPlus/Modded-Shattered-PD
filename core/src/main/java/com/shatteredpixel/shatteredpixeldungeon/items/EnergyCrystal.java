@@ -54,14 +54,14 @@ public class EnergyCrystal extends Item {
 	}
 
 	@Override
-	public boolean doPickUp(Hero hero, int pos) {
+	public boolean doPickUp(Hero hero) {
 
 		Dungeon.energy += quantity;
 		//TODO track energy collected maybe? We do already track recipes crafted though..
 
-		GameScene.pickUp( this, pos );
+		GameScene.pickUp( this, hero.pos );
 		hero.sprite.showStatus( 0x44CCFF, TXT_VALUE, quantity );
-		hero.spendAndNext( TIME_TO_PICK_UP );
+		hero.spendAndNext( Hero.TIME_TO_PICK_UP );
 
 		Sample.INSTANCE.play( Assets.Sounds.ITEM );
 

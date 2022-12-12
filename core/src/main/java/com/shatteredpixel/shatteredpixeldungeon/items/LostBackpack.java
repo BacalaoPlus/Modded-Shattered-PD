@@ -43,7 +43,7 @@ public class LostBackpack extends Item {
 	}
 
 	@Override
-	public boolean doPickUp(Hero hero, int pos) {
+	public boolean doPickUp(Hero hero) {
 		if (hero.buff(LostInventory.class) != null){
 			hero.buff(LostInventory.class).detach();
 		}
@@ -73,8 +73,8 @@ public class LostBackpack extends Item {
 
 		Item.updateQuickslot();
 		Sample.INSTANCE.play( Assets.Sounds.DEWDROP );
-		hero.spendAndNext(TIME_TO_PICK_UP);
-		GameScene.pickUp( this, pos );
+		hero.spendAndNext(Hero.TIME_TO_PICK_UP);
+		GameScene.pickUp( this, hero.pos );
 		((HeroSprite)hero.sprite).updateArmor();
 		return true;
 	}

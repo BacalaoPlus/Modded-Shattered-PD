@@ -197,9 +197,9 @@ public class SacrificialFire extends Blob {
 					Sample.INSTANCE.play(Assets.Sounds.BURNING );
 					GLog.w( Messages.get(SacrificialFire.class, "reward"));
 					if (prize != null) {
-						Dungeon.level.drop(prize, firePos).sprite.drop();
+						Dungeon.level.drop(prize, firePos);
 					} else {
-						Dungeon.level.drop(SacrificeRoom.prize(Dungeon.level), firePos).sprite.drop();
+						Dungeon.level.drop(SacrificeRoom.prize(Dungeon.level), firePos);
 					}
 				}
 			} else {

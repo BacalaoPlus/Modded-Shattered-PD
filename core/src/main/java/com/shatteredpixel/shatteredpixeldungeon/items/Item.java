@@ -59,10 +59,6 @@ public class Item implements Bundlable {
 	protected static final String TXT_TO_STRING_LVL		= "%s %+d";
 	protected static final String TXT_TO_STRING_X		= "%s x%d";
 	
-	protected static final float TIME_TO_THROW		= 1.0f;
-	protected static final float TIME_TO_PICK_UP	= 1.0f;
-	protected static final float TIME_TO_DROP		= 1.0f;
-	
 	public static final String AC_DROP		= "DROP";
 	public static final String AC_THROW		= "THROW";
 	
@@ -111,27 +107,16 @@ public class Item implements Bundlable {
 		return Messages.get(this, "ac_" + action);
 	}
 
-	public final boolean doPickUp( Hero hero ) {
-		return doPickUp( hero, hero.pos );
+	public boolean doPickUp( Hero hero ) {
+		return hero.pickUpItem(this, true);
 	}
 
-	public boolean doPickUp(Hero hero, int pos) {
-		if (collect( hero.belongings.backpack )) {
-			
-			GameScene.pickUp( this, pos );
-			Sample.INSTANCE.play( Assets.Sounds.ITEM );
-			hero.spendAndNext( TIME_TO_PICK_UP );
-			return true;
-			
-		} else {
-			return false;
-		}
+	public final boolean doPickUpNoInterrupt( Hero hero ) {
+		return hero.pickUpItem(this, false);
 	}
 	
 	public void doDrop( Hero hero ) {
-		hero.spendAndNext(TIME_TO_DROP);
-		int pos = hero.pos;
-		Dungeon.level.drop(detachAll(hero.belongings.backpack), pos).sprite.drop(pos);
+		hero.dropItem(this);
 	}
 
 	//resets an item's properties, to ensure consistency between runs
@@ -170,9 +155,9 @@ public class Item implements Bundlable {
 	
 	protected void onThrow( int cell ) {
 		Heap heap = Dungeon.level.drop( this, cell );
-		if (!heap.isEmpty()) {
+		/*if (!heap.isEmpty()) {
 			heap.sprite.drop( cell );
-		}
+		}*/
 	}
 	
 	//takes two items and merges them (if possible)
@@ -288,9 +273,10 @@ public class Item implements Bundlable {
 			
 		}
 	}
-	
-	public final Item detachAll( Bag container ) {
-		Dungeon.quickslot.clearItem( this );
+
+	public final Item detachAll( Bag container, boolean removeFromQuickslot ) {
+		if(removeFromQuickslot)
+			Dungeon.quickslot.clearItem( this );
 
 		for (Item item : container.items) {
 			if (item == this) {
@@ -309,6 +295,10 @@ public class Item implements Bundlable {
 
 		updateQuickslot();
 		return this;
+	}
+
+	public final Item detachAll( Bag container ) {
+		return detachAll(container, true);
 	}
 	
 	public boolean isSimilar( Item item ) {
@@ -622,7 +612,7 @@ public class Item implements Bundlable {
 	}
 	
 	public float castDelay( Char user, int dst ){
-		return TIME_TO_THROW;
+		return Hero.TIME_TO_THROW;
 	}
 	
 	protected static Hero curUser = null;

@@ -102,7 +102,7 @@ public class Thief extends Mob {
 	@Override
 	public void rollToDropLoot() {
 		if (item != null) {
-			Dungeon.level.drop( item, pos ).sprite.drop();
+			Dungeon.level.drop( item, pos );
 			//updates position
 			if (item instanceof Honeypot.ShatteredPot) ((Honeypot.ShatteredPot)item).dropPot( this, pos );
 			item = null;
@@ -141,7 +141,7 @@ public class Thief extends Mob {
 	@Override
 	public int defenseProc(Char enemy, int damage) {
 		if (state == FLEEING) {
-			Dungeon.level.drop( new Gold(), pos ).sprite.drop();
+			Dungeon.level.drop( new Gold(), pos );
 		}
 
 		return super.defenseProc(enemy, damage);

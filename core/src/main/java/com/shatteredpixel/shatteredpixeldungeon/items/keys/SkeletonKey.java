@@ -48,7 +48,7 @@ public class SkeletonKey extends Key {
 	}
 
 	@Override
-	public boolean doPickUp(Hero hero, int pos) {
+	public boolean doPickUp(Hero hero) {
 		if(!SPDSettings.supportNagged()){
 			try {
 				Dungeon.saveAll();
@@ -64,7 +64,7 @@ public class SkeletonKey extends Key {
 			
 		}
 		
-		return super.doPickUp(hero, pos);
+		return super.doPickUp(hero);
 	}
 
 }
