@@ -125,7 +125,7 @@ public class HeavyBoomerang extends MissileWeapon {
 										@Override
 										public void call() {
 											if (returnTarget == target){
-												if (target instanceof Hero && boomerang.doPickUp((Hero) target)) {
+												if (target instanceof Hero && Dungeon.hero.pickUpItem(boomerang)) {
 													//grabbing the boomerang takes no time
 													((Hero) target).spend(-Hero.TIME_TO_PICK_UP);
 												} else {

@@ -73,9 +73,9 @@ public class TengusMask extends Item {
 	}
 	
 	@Override
-	public boolean doPickUp(Hero hero) {
+	public boolean doPickUp() {
 		Badges.validateMastery();
-		return super.doPickUp( hero);
+		return super.doPickUp( );
 	}
 	
 	@Override

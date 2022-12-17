@@ -69,12 +69,12 @@ public class Amulet extends Item {
 	}
 	
 	@Override
-	public boolean doPickUp(Hero hero) {
-		if (super.doPickUp( hero )) {
+	public boolean doPickUp() {
+		if (super.doPickUp()) {
 			
 			if (!Statistics.amuletObtained) {
 				Statistics.amuletObtained = true;
-				hero.spend(-Hero.TIME_TO_PICK_UP);
+				Dungeon.hero.spend(-Hero.TIME_TO_PICK_UP);
 
 				//add a delayed actor here so pickup behaviour can fully process.
 				Actor.addDelayed(new Actor(){

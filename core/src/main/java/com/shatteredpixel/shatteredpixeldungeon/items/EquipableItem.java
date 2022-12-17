@@ -53,8 +53,8 @@ public abstract class EquipableItem extends Item {
 	}
 
 	@Override
-	public boolean doPickUp(Hero hero) {
-		if (super.doPickUp(hero)){
+	public boolean doPickUp() {
+		if (super.doPickUp()){
 			if (!isIdentified() && !Document.ADVENTURERS_GUIDE.isPageRead(Document.GUIDE_IDING)){
 				GLog.p(Messages.get(Guidebook.class, "hint"));
 				GameScene.flashForDocument(Document.ADVENTURERS_GUIDE, Document.GUIDE_IDING);
@@ -85,9 +85,9 @@ public abstract class EquipableItem extends Item {
 	}
 
 	@Override
-	public void doDrop( Hero hero ) {
-		if (!isEquipped( hero ) || doUnequip( hero, false, false )) {
-			super.doDrop( hero );
+	public void doDrop( ) {
+		if (!isEquipped( Dungeon.hero ) || doUnequip( Dungeon.hero, false, false )) {
+			super.doDrop( );
 		}
 	}
 

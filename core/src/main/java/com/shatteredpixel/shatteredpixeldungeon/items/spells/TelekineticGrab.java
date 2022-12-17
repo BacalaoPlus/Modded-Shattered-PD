@@ -72,8 +72,8 @@ public class TelekineticGrab extends TargetedSpell {
 			while (ch.buff(PinCushion.class) != null) {
 				Item item = ch.buff(PinCushion.class).grabOne();
 
-				//TODO MODDED fix this!! should pick in ch.pos
-				if (item.doPickUp(hero)) {
+				item.assignHeap(ch.pos);
+				if (hero.pickUpItem(item)) {
 					hero.spend(-Hero.TIME_TO_PICK_UP); //casting the spell already takes a turn
 					GLog.i( Messages.capitalize(Messages.get(hero, "you_now_have", item.name())) );
 
@@ -97,8 +97,9 @@ public class TelekineticGrab extends TargetedSpell {
 
 			while (!h.isEmpty()) {
 				Item item = h.peek();
-				//TODO MODDED fix this!! should pick in h.pos
-				if (item.doPickUp(hero)) {
+
+				item.assignHeap(h.pos);
+				if (hero.pickUpItem(item)) {
 					h.pickUp();
 					hero.spend(-Hero.TIME_TO_PICK_UP); //casting the spell already takes a turn
 					GLog.i( Messages.capitalize(Messages.get(hero, "you_now_have", item.name())) );

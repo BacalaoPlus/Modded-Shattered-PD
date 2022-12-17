@@ -473,7 +473,9 @@ public class DriedRose extends Artifact {
 		}
 
 		@Override
-		public boolean doPickUp(Hero hero) {
+		public boolean doPickUp() {
+
+			Hero hero = Dungeon.hero;
 			DriedRose rose = hero.belongings.getItem( DriedRose.class );
 
 			if (rose == null){
@@ -481,7 +483,7 @@ public class DriedRose extends Artifact {
 				return false;
 			} if ( rose.level() >= rose.levelCap ){
 				GLog.i( Messages.get(this, "no_room") );
-				hero.spendAndNext(Hero.TIME_TO_PICK_UP);
+
 				return true;
 			} else {
 
@@ -492,8 +494,8 @@ public class DriedRose extends Artifact {
 					GLog.i( Messages.get(this, "levelup") );
 
 				Sample.INSTANCE.play( Assets.Sounds.DEWDROP );
-				GameScene.pickUp(this, hero.pos);
-				hero.spendAndNext(Hero.TIME_TO_PICK_UP);
+				GameScene.pickUp(this, pickUpPos());
+
 				return true;
 
 			}
@@ -880,7 +882,7 @@ public class DriedRose extends Artifact {
 				protected void onClick() {
 					if (rose.weapon != null){
 						item(new WndBag.Placeholder(ItemSpriteSheet.WEAPON_HOLDER));
-						if (!rose.weapon.doPickUp(Dungeon.hero)){
+						if (!Dungeon.hero.pickUpItem(rose.weapon)){
 							Dungeon.level.drop( rose.weapon, Dungeon.hero.pos);
 						}
 						rose.weapon = null;
@@ -946,7 +948,7 @@ public class DriedRose extends Artifact {
 				protected void onClick() {
 					if (rose.armor != null){
 						item(new WndBag.Placeholder(ItemSpriteSheet.ARMOR_HOLDER));
-						if (!rose.armor.doPickUp(Dungeon.hero)){
+						if (!Dungeon.hero.pickUpItem(rose.armor)){
 							Dungeon.level.drop( rose.armor, Dungeon.hero.pos);
 						}
 						rose.armor = null;

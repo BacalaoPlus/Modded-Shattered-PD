@@ -707,7 +707,7 @@ public class Tengu extends Mob {
 			}
 			
 			@Override
-			public boolean doPickUp(Hero hero) {
+			public boolean doPickUp() {
 				GLog.w( Messages.get(this, "cant_pickup") );
 				return false;
 			}
@@ -1090,7 +1090,7 @@ public class Tengu extends Mob {
 			}
 			
 			@Override
-			public boolean doPickUp(Hero hero) {
+			public boolean doPickUp() {
 				GLog.w( Messages.get(this, "cant_pickup") );
 				return false;
 			}

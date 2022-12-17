@@ -74,6 +74,11 @@ public class Item implements Bundlable {
 	public boolean dropsDownHeap = false;
 	
 	private int level = 0;
+	protected Heap heapAssigned = null;
+
+	protected int pickUpPos() {
+		return (heapAssigned == null ? Dungeon.hero.pos : heapAssigned.pos);
+	}
 
 	public boolean levelKnown = false;
 	
@@ -107,16 +112,28 @@ public class Item implements Bundlable {
 		return Messages.get(this, "ac_" + action);
 	}
 
-	public boolean doPickUp( Hero hero ) {
-		return hero.pickUpItem(this, true);
+	public void assignHeap(int cell) {
+		heapAssigned = Dungeon.level.heaps.get(cell);
 	}
 
-	public final boolean doPickUpNoInterrupt( Hero hero ) {
-		return hero.pickUpItem(this, false);
+	public boolean doPickUp( ) {
+		Hero hero = Dungeon.hero;
+
+		if (collect( hero.belongings.backpack )) {
+
+			GameScene.pickUp( this,  pickUpPos());
+			Sample.INSTANCE.play( Assets.Sounds.ITEM );
+
+			return true;
+
+		} else {
+			return false;
+		}
 	}
 	
-	public void doDrop( Hero hero ) {
-		hero.dropItem(this);
+	public void doDrop( ) {
+		detachAll(Dungeon.hero.belongings.backpack, false);
+		Heap heap = Dungeon.level.drop(this, Dungeon.hero.pos );
 	}
 
 	//resets an item's properties, to ensure consistency between runs
@@ -124,7 +141,7 @@ public class Item implements Bundlable {
 		keptThoughLostInvent = false;
 	}
 
-	public void doThrow( Hero hero ) {
+	public void doThrow() {
 		GameScene.selectCell(thrower);
 	}
 	
@@ -137,13 +154,13 @@ public class Item implements Bundlable {
 		if (action.equals( AC_DROP )) {
 			
 			if (hero.belongings.backpack.contains(this) || isEquipped(hero)) {
-				doDrop(hero);
+				hero.dropItem(this);
 			}
 			
 		} else if (action.equals( AC_THROW )) {
 			
 			if (hero.belongings.backpack.contains(this) || isEquipped(hero)) {
-				doThrow(hero);
+				doThrow();
 			}
 			
 		}
@@ -155,9 +172,6 @@ public class Item implements Bundlable {
 	
 	protected void onThrow( int cell ) {
 		Heap heap = Dungeon.level.drop( this, cell );
-		/*if (!heap.isEmpty()) {
-			heap.sprite.drop( cell );
-		}*/
 	}
 	
 	//takes two items and merges them (if possible)
@@ -277,6 +291,8 @@ public class Item implements Bundlable {
 	public final Item detachAll( Bag container, boolean removeFromQuickslot ) {
 		if(removeFromQuickslot)
 			Dungeon.quickslot.clearItem( this );
+		else
+			Dungeon.quickslot.convertToPlaceholder(this);
 
 		for (Item item : container.items) {
 			if (item == this) {

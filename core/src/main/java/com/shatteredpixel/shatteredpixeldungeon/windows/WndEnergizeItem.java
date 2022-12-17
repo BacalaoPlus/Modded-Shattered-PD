@@ -127,7 +127,7 @@ public class WndEnergizeItem extends WndInfoItem {
 			//selling items in the sell interface doesn't spend time
 			hero.spend(-hero.cooldown());
 
-			new EnergyCrystal(item.energyVal()).doPickUp(hero);
+			hero.pickUpItem(new EnergyCrystal(item.energyVal()));
 
 		}
 	}
@@ -152,7 +152,7 @@ public class WndEnergizeItem extends WndInfoItem {
 				//selling items in the sell interface doesn't spend time
 				hero.spend(-hero.cooldown());
 
-				new EnergyCrystal(item.energyVal()).doPickUp(hero);
+				hero.pickUpItem(new EnergyCrystal(item.energyVal()));
 			}
 		}
 	}

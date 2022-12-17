@@ -32,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.watabou.noosa.audio.Sample;
 
 public class LostBackpack extends Item {
@@ -43,7 +44,10 @@ public class LostBackpack extends Item {
 	}
 
 	@Override
-	public boolean doPickUp(Hero hero) {
+	public boolean doPickUp() {
+
+		Hero hero = Dungeon.hero;
+
 		if (hero.buff(LostInventory.class) != null){
 			hero.buff(LostInventory.class).detach();
 		}
@@ -73,8 +77,8 @@ public class LostBackpack extends Item {
 
 		Item.updateQuickslot();
 		Sample.INSTANCE.play( Assets.Sounds.DEWDROP );
-		hero.spendAndNext(Hero.TIME_TO_PICK_UP);
-		GameScene.pickUp( this, hero.pos );
+
+		GameScene.pickUp( this, pickUpPos() );
 		((HeroSprite)hero.sprite).updateArmor();
 		return true;
 	}

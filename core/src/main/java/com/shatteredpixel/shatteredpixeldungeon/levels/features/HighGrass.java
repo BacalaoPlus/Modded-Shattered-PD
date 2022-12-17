@@ -53,7 +53,7 @@ public class HighGrass {
 	private static boolean freezeTrample = false;
 
 	public static void trample( Level level, int pos ) {
-		boolean trampledItem = false;
+		int trampledItem = 0;
 
 		if (freezeTrample) return;
 		
@@ -115,7 +115,7 @@ public class HighGrass {
 						if (droppingBerry) {
 							dropped.countUp(1);
 							level.drop(new Berry(), pos);
-							trampledItem = true;
+							trampledItem++;
 						}
 					}
 
@@ -126,13 +126,13 @@ public class HighGrass {
 				// Seed, scales from 1/25 to 1/9
 				if (Random.Int(25 - (naturalismLevel * 4)) == 0) {
 					level.drop(Generator.random(Generator.Category.SEED), pos);
-					trampledItem = true;
+					trampledItem++;
 				}
 				
 				// Dew, scales from 1/6 to 1/4
 				if (Random.Int(6 - naturalismLevel/2) == 0) {
 					level.drop(new Dewdrop(), pos);
-					trampledItem = true;
+					trampledItem++;
 				}
 			}
 

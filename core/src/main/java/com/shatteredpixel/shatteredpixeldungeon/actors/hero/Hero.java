@@ -218,7 +218,7 @@ public class Hero extends Char {
 	// for enemies we know we aren't seeing normally, resulting in better performance
 	public ArrayList<Mob> mindVisionEnemies = new ArrayList<>();
 
-	public boolean trampledItemLast = false;
+	public int trampledItemLast = 0;
 
 	public Hero() {
 		super();
@@ -439,18 +439,24 @@ public class Hero extends Char {
 	}
 
 	public void dropItem(Item item) {
-		spendAndNext(TIME_TO_DROP);
-
-		item.detachAll(belongings.backpack, false);
-		Heap heap = Dungeon.level.drop(item, pos);
+		dropItem(item, true);
 	}
 
-	//TODO MODDED fix me dewdrops and keys dont get picked up properly
-	public boolean pickUpItem(Item item, boolean interrupt) {
-		if (item.collect( belongings.backpack )) {
+	public void dropItem(Item item, boolean interrupt) {
+		item.doDrop();
 
-			GameScene.pickUp( item, pos );
-			Sample.INSTANCE.play( Assets.Sounds.ITEM );
+		if (interrupt)
+			spendAndNext(TIME_TO_DROP);
+		else
+			spend(TIME_TO_DROP);
+	}
+
+	public boolean pickUpItem(Item item) {
+		return pickUpItem(item, true);
+	}
+
+	public boolean pickUpItem(Item item, boolean interrupt) {
+		if (item.doPickUp()) {
 
 			if(interrupt)
 				spendAndNext( TIME_TO_PICK_UP );
@@ -463,6 +469,22 @@ public class Hero extends Char {
 			return false;
 		}
 	}
+
+	/*
+	public void throwItem(Item item) {
+		throwItem(item, true);
+	}
+
+	public void throwItem(Item item, boolean interrupt) {
+
+		item.doThrow();
+
+		if(interrupt)
+			spendAndNext( TIME_TO_PICK_UP );
+		else
+			spend( TIME_TO_PICK_UP );
+	}
+	*/
 
 	public boolean shoot( Char enemy, MissileWeapon wep ) {
 
@@ -670,14 +692,16 @@ public class Hero extends Char {
 	}
 
 	public void spendAndNextConstant( float time ) {
-		busy();
 		spendConstant( time );
+
+		busy();
 		next();
 	}
 
 	public void spendAndNext( float time ) {
-		busy();
 		spend( time );
+
+		busy();
 		next();
 	}
 	
@@ -905,6 +929,39 @@ public class Hero extends Char {
 		}
 	}
 
+	private void GLOGPickUp(	Item item, boolean successful ) {
+
+		if(successful) {
+			if (item instanceof Dewdrop
+					|| item instanceof TimekeepersHourglass.sandBag
+					|| item instanceof DriedRose.Petal
+					|| item instanceof Key
+					|| item instanceof Guidebook) {
+				//Do Nothing
+			} else {
+
+				//TODO make all unique items important? or just POS / SOU?
+				boolean important = item.unique && item.isIdentified() &&
+						(item instanceof Scroll || item instanceof Potion);
+				if (important) {
+					GLog.p( Messages.capitalize(Messages.get(this, "you_now_have", item.name())) );
+				} else {
+					GLog.i( Messages.capitalize(Messages.get(this, "you_now_have", item.name())) );
+				}
+			}
+		} else {
+			if (item instanceof Dewdrop
+					|| item instanceof TimekeepersHourglass.sandBag
+					|| item instanceof DriedRose.Petal
+					|| item instanceof Key) {
+				//Do Nothing
+			} else {
+				GLog.newLine();
+				GLog.n(Messages.capitalize(Messages.get(this, "you_cant_have", item.name())));
+			}
+		}
+	}
+
 	//used to keep track if the wait/pickup action was used
 	// so that the hero spends a turn even if they fail to pick up an item
 	public boolean waitOrPickup = false;
@@ -916,26 +973,11 @@ public class Hero extends Char {
 			Heap heap = Dungeon.level.heaps.get( pos );
 			if (heap != null) {
 				Item item = heap.peek();
-				if (pickUpItem( item, true )) {
+
+				boolean successful = pickUpItem( item, true );
+
+				if (successful) {
 					heap.pickUp();
-
-					if (item instanceof Dewdrop
-							|| item instanceof TimekeepersHourglass.sandBag
-							|| item instanceof DriedRose.Petal
-							|| item instanceof Key
-							|| item instanceof Guidebook) {
-						//Do Nothing
-					} else {
-
-						//TODO make all unique items important? or just POS / SOU?
-						boolean important = item.unique && item.isIdentified() &&
-								(item instanceof Scroll || item instanceof Potion);
-						if (important) {
-							GLog.p( Messages.capitalize(Messages.get(this, "you_now_have", item.name())) );
-						} else {
-							GLog.i( Messages.capitalize(Messages.get(this, "you_now_have", item.name())) );
-						}
-					}
 					
 					curAction = null;
 				} else {
@@ -951,18 +993,11 @@ public class Hero extends Char {
 						heap.sprite.drop();
 					}
 
-					if (item instanceof Dewdrop
-							|| item instanceof TimekeepersHourglass.sandBag
-							|| item instanceof DriedRose.Petal
-							|| item instanceof Key) {
-						//Do Nothing
-					} else {
-						GLog.newLine();
-						GLog.n(Messages.capitalize(Messages.get(this, "you_cant_have", item.name())));
-					}
-
 					ready();
 				}
+
+				GLOGPickUp(item, successful);
+
 			} else {
 				ready();
 			}
@@ -1404,35 +1439,41 @@ public class Hero extends Char {
 	
 	private boolean getCloser( final int target ) {
 		//if hero trampled an item from grass last move, pick it up
-		if (trampledItemLast && visibleEnemies.size() == 0) {
+		if (trampledItemLast > 0 && visibleEnemies.size() == 0) {
 
-			trampledItemLast = false;
 			justMoved = false;
 
 			Heap heap = Dungeon.level.heaps.get(Dungeon.hero.pos);
-			Item item = heap.peek();
-
 			Waterskin waterskin = belongings.getItem(Waterskin.class);
 
-			if (item instanceof Dewdrop && waterskin.isFull()) {
-				//do nothing
-			} else {
-				//pick up item
+			do {
+				Item item = heap.peek();
 
-				pickUpItem(item, false);
-				heap.pickUp();
-			}
+				if (item instanceof Dewdrop && waterskin.isFull()) {
+					//do nothing
+				} else {
+					boolean successful = pickUpItem(item, false);
+					if(successful)
+						heap.pickUp();
+
+					GLOGPickUp(item, successful);
+				}
+
+				trampledItemLast--;
+			} while (trampledItemLast > 0);
 
 			return true;
 		}
+		trampledItemLast = 0;
+
 
 		if (target == pos)
 			return false;
 
 		if (rooted) {
 			Camera.main.shake( 1, 1f );
-			//TODO MODDED spend turn
-			//spend(1);
+			spendAndNext(TICK);
+
 			return false;
 		}
 

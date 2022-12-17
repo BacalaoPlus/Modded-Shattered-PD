@@ -47,12 +47,12 @@ public abstract class Key extends Item {
 	}
 
 	@Override
-	public boolean doPickUp(Hero hero) {
-		GameScene.pickUpJournal(this, hero.pos);
+	public boolean doPickUp() {
+		GameScene.pickUpJournal(this, pickUpPos());
 		WndJournal.last_index = 2;
 		Notes.add(this);
 		Sample.INSTANCE.play( Assets.Sounds.ITEM );
-		hero.spendAndNext( Hero.TIME_TO_PICK_UP );
+
 		GameScene.updateKeyDisplay();
 		return true;
 	}

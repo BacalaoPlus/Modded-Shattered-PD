@@ -99,7 +99,7 @@ public class Blacksmith extends NPC {
 							Notes.add( Notes.Landmark.TROLL );
 							
 							Pickaxe pick = new Pickaxe();
-							if (pick.doPickUp( Dungeon.hero )) {
+							if (pick.doPickUp( )) {
 								GLog.i( Messages.capitalize(Messages.get(Dungeon.hero, "you_now_have", pick.name()) ));
 							} else {
 								Dungeon.level.drop( pick, Dungeon.hero.pos );

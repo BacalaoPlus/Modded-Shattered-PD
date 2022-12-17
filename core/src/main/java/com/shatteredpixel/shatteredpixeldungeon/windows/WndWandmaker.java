@@ -102,7 +102,7 @@ public class WndWandmaker extends Window {
 		questItem.detach( Dungeon.hero.belongings.backpack );
 
 		reward.identify(false);
-		if (reward.doPickUp( Dungeon.hero )) {
+		if (Dungeon.hero.pickUpItem(reward)) {
 			GLog.i( Messages.capitalize(Messages.get(Dungeon.hero, "you_now_have", reward.name())) );
 		} else {
 			Dungeon.level.drop( reward, wandmaker.pos );

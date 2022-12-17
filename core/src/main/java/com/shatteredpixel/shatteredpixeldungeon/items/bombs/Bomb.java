@@ -124,12 +124,12 @@ public class Bomb extends Item {
 	}
 
 	@Override
-	public boolean doPickUp(Hero hero) {
+	public boolean doPickUp() {
 		if (fuse != null) {
 			GLog.w( Messages.get(this, "snuff_fuse") );
 			fuse = null;
 		}
-		return super.doPickUp(hero);
+		return super.doPickUp();
 	}
 
 	public void explode(int cell){
@@ -324,13 +324,13 @@ public class Bomb extends Item {
 		}
 
 		@Override
-		public boolean doPickUp(Hero hero) {
+		public boolean doPickUp() {
 			Bomb bomb = new Bomb();
 			bomb.quantity(2);
-			if (bomb.doPickUp(hero)) {
+			if (bomb.doPickUp()) {
 				//isaaaaac.... (don't bother doing this when not in english)
 				if (SPDSettings.language() == Languages.ENGLISH)
-					hero.sprite.showStatus(CharSprite.NEUTRAL, "1+1 free!");
+					Dungeon.hero.sprite.showStatus(CharSprite.NEUTRAL, "1+1 free!");
 				return true;
 			}
 			return false;

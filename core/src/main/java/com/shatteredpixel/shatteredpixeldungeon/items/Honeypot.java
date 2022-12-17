@@ -156,9 +156,9 @@ public class Honeypot extends Item {
 		}
 
 		@Override
-		public boolean doPickUp(Hero hero) {
-			if ( super.doPickUp(hero) ){
-				pickupPot( hero );
+		public boolean doPickUp() {
+			if ( super.doPickUp() ){
+				pickupPot( Dungeon.hero );
 				return true;
 			} else {
 				return false;
@@ -166,9 +166,9 @@ public class Honeypot extends Item {
 		}
 
 		@Override
-		public void doDrop(Hero hero) {
-			super.doDrop(hero);
-			dropPot(hero, hero.pos);
+		public void doDrop() {
+			super.doDrop();
+			dropPot(Dungeon.hero, Dungeon.hero.pos);
 		}
 
 		@Override

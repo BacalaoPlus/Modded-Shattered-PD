@@ -65,10 +65,10 @@ public class CorpseDust extends Item {
 	}
 
 	@Override
-	public boolean doPickUp(Hero hero) {
-		if (super.doPickUp(hero)){
+	public boolean doPickUp() {
+		if (super.doPickUp()){
 			GLog.n( Messages.get( this, "chill") );
-			Buff.affect(hero, DustGhostSpawner.class);
+			Buff.affect(Dungeon.hero, DustGhostSpawner.class);
 			return true;
 		}
 		return false;

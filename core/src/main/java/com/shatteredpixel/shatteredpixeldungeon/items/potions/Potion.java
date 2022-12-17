@@ -257,7 +257,7 @@ public class Potion extends Item {
 	}
 	
 	@Override
-	public void doThrow( final Hero hero ) {
+	public void doThrow( ) {
 
 		if (isKnown()
 				&& !mustThrowPots.contains(this.getClass())
@@ -271,14 +271,14 @@ public class Potion extends Item {
 					@Override
 					protected void onSelect(int index) {
 						if (index == 0) {
-							Potion.super.doThrow( hero );
+							Potion.super.doThrow();
 						}
 					}
 				}
 			);
 			
 		} else {
-			super.doThrow( hero );
+			super.doThrow( );
 		}
 	}
 	

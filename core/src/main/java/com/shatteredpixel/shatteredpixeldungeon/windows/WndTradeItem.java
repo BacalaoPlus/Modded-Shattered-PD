@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Shopkeeper;
+import com.shatteredpixel.shatteredpixeldungeon.items.EnergyCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
@@ -140,7 +141,7 @@ public class WndTradeItem extends WndInfoItem {
 						Item item = heap.pickUp();
 						hide();
 
-						if (!item.doPickUp(hero)) {
+						if (!Dungeon.hero.pickUpItem(item)) {
 							Dungeon.level.drop(item, heap.pos);
 						}
 					} else {
@@ -189,7 +190,7 @@ public class WndTradeItem extends WndInfoItem {
 		//selling items in the sell interface doesn't spend time
 		hero.spend(-hero.cooldown());
 
-		new Gold( item.value() ).doPickUp( hero );
+		hero.pickUpItem(new Gold( item.value() ));
 	}
 
 	public static void sellOne( Item item ) {
@@ -205,7 +206,7 @@ public class WndTradeItem extends WndInfoItem {
 			//selling items in the sell interface doesn't spend time
 			hero.spend(-hero.cooldown());
 
-			new Gold( item.value() ).doPickUp( hero );
+			hero.pickUpItem(new Gold( item.value() ));
 		}
 	}
 	
@@ -217,7 +218,7 @@ public class WndTradeItem extends WndInfoItem {
 		int price = Shopkeeper.sellPrice( item );
 		Dungeon.gold -= price;
 		
-		if (!item.doPickUp( Dungeon.hero )) {
+		if (!Dungeon.hero.pickUpItem(item)) {
 			Dungeon.level.drop( item, heap.pos );
 		}
 	}

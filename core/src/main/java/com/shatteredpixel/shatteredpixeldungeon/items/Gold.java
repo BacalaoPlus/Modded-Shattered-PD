@@ -58,15 +58,14 @@ public class Gold extends Item {
 	}
 	
 	@Override
-	public boolean doPickUp(Hero hero) {
+	public boolean doPickUp() {
 		
 		Dungeon.gold += quantity;
 		Statistics.goldCollected += quantity;
 		Badges.validateGoldCollected();
 
-		GameScene.pickUp( this, hero.pos );
-		hero.sprite.showStatus( CharSprite.NEUTRAL, TXT_VALUE, quantity );
-		hero.spendAndNext( Hero.TIME_TO_PICK_UP );
+		GameScene.pickUp( this, pickUpPos() );
+		Dungeon.hero.sprite.showStatus( CharSprite.NEUTRAL, TXT_VALUE, quantity );
 		
 		Sample.INSTANCE.play( Assets.Sounds.GOLD, 1, 1, Random.Float( 0.9f, 1.1f ) );
 		updateQuickslot();
