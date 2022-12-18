@@ -1439,33 +1439,31 @@ public class Hero extends Char {
 	
 	private boolean getCloser( final int target ) {
 		//if hero trampled an item from grass last move, pick it up
-		if (trampledItemLast > 0 && visibleEnemies.size() == 0) {
-
-			justMoved = false;
+		if(trampledItemLast > 0) {
 
 			Heap heap = Dungeon.level.heaps.get(Dungeon.hero.pos);
 			Waterskin waterskin = belongings.getItem(Waterskin.class);
 
-			do {
-				Item item = heap.peek();
+			if (visibleEnemies.size() == 0) {
+				while (trampledItemLast > 0 && heap != null) {
+					Item item = heap.peek();
 
-				if (item instanceof Dewdrop && waterskin.isFull()) {
-					//do nothing
-				} else {
-					boolean successful = pickUpItem(item, false);
-					if(successful)
-						heap.pickUp();
+					if (item instanceof Dewdrop && waterskin.isFull()) {
+						//do nothing
+					} else {
+						boolean successful = pickUpItem(item, false);
+						if (successful)
+							heap.pickUp();
+						GLOGPickUp(item, successful);
+					}
 
-					GLOGPickUp(item, successful);
+					justMoved = false;
+					trampledItemLast--;
 				}
+			}
 
-				trampledItemLast--;
-			} while (trampledItemLast > 0);
-
-			return true;
+			trampledItemLast = 0;
 		}
-		trampledItemLast = 0;
-
 
 		if (target == pos)
 			return false;

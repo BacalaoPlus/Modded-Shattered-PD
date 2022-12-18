@@ -42,7 +42,7 @@ public class Dewdrop extends Item {
 		image = ItemSpriteSheet.DEWDROP;
 		
 		stackable = true;
-		dropsDownHeap = true;
+		dropsDownHeap = false;
 	}
 	
 	@Override
