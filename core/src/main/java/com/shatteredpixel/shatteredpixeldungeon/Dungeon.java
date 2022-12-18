@@ -825,6 +825,18 @@ public class Dungeon {
 
 		observe( dist+1 );
 	}
+
+	private static void updateNearbyTiles(boolean[] extendedHeroFOV, int pos) {
+		BArray.or( level.visited, level.heroFOV, pos - 1 - level.width(), 3, level.visited );
+		BArray.or( level.visited, level.heroFOV, pos - 1, 3, level.visited );
+		BArray.or( level.visited, level.heroFOV, pos - 1 + level.width(), 3, level.visited );
+
+		BArray.or( level.extVisited, extendedHeroFOV, pos - 2 - 2*level.width(), 5, level.extVisited );
+		BArray.or( level.extVisited, extendedHeroFOV, pos - 2 - level.width(), 5, level.extVisited );
+		BArray.or( level.extVisited, extendedHeroFOV, pos - 2, 5, level.extVisited );
+		BArray.or( level.extVisited, extendedHeroFOV, pos - 2 + level.width(), 5, level.extVisited );
+		BArray.or( level.extVisited, extendedHeroFOV, pos - 2 + 2*level.width(), 5, level.extVisited );
+	}
 	
 	public static void observe( int dist ) {
 
@@ -847,19 +859,36 @@ public class Dungeon {
 		int height = b - t + 1;
 		
 		int pos = l + t * level.width();
-	
+
+		boolean[] extendedHeroFOV = level.heroFOV.clone();
+
+		for (int i = 0; i < level.length(); i++ ) {
+			if (level.passable[i] && level.heroFOV[i]) {
+				for(int offset : PathFinder.NEIGHBOURS9) {
+					extendedHeroFOV[i + offset] = true;
+				}
+			}
+		}
+
 		for (int i = t; i <= b; i++) {
 			BArray.or( level.visited, level.heroFOV, pos, width, level.visited );
 			pos+=level.width();
 		}
-	
+
+		pos = l + t * level.width();
+		for (int i = t; i <= b; i++) {
+			BArray.or( level.extVisited, extendedHeroFOV, pos, width, level.extVisited );
+			pos+=level.width();
+		}
+
+
 		GameScene.updateFog(l, t, width, height);
 
 		if (hero.buff(MindVision.class) != null){
 			for (Mob m : level.mobs.toArray(new Mob[0])){
-				BArray.or( level.visited, level.heroFOV, m.pos - 1 - level.width(), 3, level.visited );
-				BArray.or( level.visited, level.heroFOV, m.pos - 1, 3, level.visited );
-				BArray.or( level.visited, level.heroFOV, m.pos - 1 + level.width(), 3, level.visited );
+
+				updateNearbyTiles(extendedHeroFOV, m.pos);
+
 				//updates adjacent cells too
 				GameScene.updateFog(m.pos, 2);
 			}
@@ -867,9 +896,9 @@ public class Dungeon {
 
 		if (hero.buff(Awareness.class) != null){
 			for (Heap h : level.heaps.valueList()){
-				BArray.or( level.visited, level.heroFOV, h.pos - 1 - level.width(), 3, level.visited );
-				BArray.or( level.visited, level.heroFOV, h.pos - 1, 3, level.visited );
-				BArray.or( level.visited, level.heroFOV, h.pos - 1 + level.width(), 3, level.visited );
+
+				updateNearbyTiles(extendedHeroFOV, h.pos);
+
 				GameScene.updateFog(h.pos, 2);
 			}
 		}
@@ -877,25 +906,25 @@ public class Dungeon {
 		for (TalismanOfForesight.CharAwareness c : hero.buffs(TalismanOfForesight.CharAwareness.class)){
 			Char ch = (Char) Actor.findById(c.charID);
 			if (ch == null || !ch.isAlive()) continue;
-			BArray.or( level.visited, level.heroFOV, ch.pos - 1 - level.width(), 3, level.visited );
-			BArray.or( level.visited, level.heroFOV, ch.pos - 1, 3, level.visited );
-			BArray.or( level.visited, level.heroFOV, ch.pos - 1 + level.width(), 3, level.visited );
+
+			updateNearbyTiles(extendedHeroFOV, ch.pos);
+
 			GameScene.updateFog(ch.pos, 2);
 		}
 
 		for (TalismanOfForesight.HeapAwareness h : hero.buffs(TalismanOfForesight.HeapAwareness.class)){
 			if (Dungeon.depth != h.depth) continue;
-			BArray.or( level.visited, level.heroFOV, h.pos - 1 - level.width(), 3, level.visited );
-			BArray.or( level.visited, level.heroFOV, h.pos - 1, 3, level.visited );
-			BArray.or( level.visited, level.heroFOV, h.pos - 1 + level.width(), 3, level.visited );
+
+			updateNearbyTiles(extendedHeroFOV, h.pos);
+
 			GameScene.updateFog(h.pos, 2);
 		}
 
 		for (RevealedArea a : hero.buffs(RevealedArea.class)){
 			if (Dungeon.depth != a.depth) continue;
-			BArray.or( level.visited, level.heroFOV, a.pos - 1 - level.width(), 3, level.visited );
-			BArray.or( level.visited, level.heroFOV, a.pos - 1, 3, level.visited );
-			BArray.or( level.visited, level.heroFOV, a.pos - 1 + level.width(), 3, level.visited );
+
+			updateNearbyTiles(extendedHeroFOV, a.pos);
+
 			GameScene.updateFog(a.pos, 2);
 		}
 
@@ -916,10 +945,16 @@ public class Dungeon {
 				width = r - l + 1;
 				height = b - t + 1;
 
-				pos = l + t * level.width();
 
+				pos = l + t * level.width();
 				for (int i = t; i <= b; i++) {
 					BArray.or( level.visited, level.heroFOV, pos, width, level.visited );
+					pos+=level.width();
+				}
+
+				pos = l + t * level.width();
+				for (int i = t; i <= b; i++) {
+					BArray.or( level.extVisited, extendedHeroFOV, pos, width, level.extVisited );
 					pos+=level.width();
 				}
 				GameScene.updateFog(ch.pos, dist);
