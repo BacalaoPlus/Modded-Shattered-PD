@@ -750,9 +750,7 @@ public class Hero extends Char {
 			actResult = false;
 			
 		} else {
-			
-			resting = false;
-			
+
 			ready = false;
 			
 			if (curAction instanceof HeroAction.Move) {
@@ -801,7 +799,6 @@ public class Hero extends Char {
 	private void ready() {
 		if (sprite.looping()) sprite.idle();
 		curAction = null;
-		damageInterrupt = true;
 		waitOrPickup = false;
 		ready = true;
 
@@ -823,7 +820,6 @@ public class Hero extends Char {
 	public void resume() {
 		curAction = lastAction;
 		lastAction = null;
-		damageInterrupt = false;
 		next();
 	}
 
@@ -841,8 +837,7 @@ public class Hero extends Char {
 		} else {
 			if (isStandingOnTrampleableGrass()) {
 				Dungeon.level.pressCell(pos);
-				spend(1 / speed());
-				//return true;
+				spendAndNext(1 / speed());
 			} else {
 				ready();
 			}
@@ -1232,7 +1227,18 @@ public class Hero extends Char {
 				sprite.showStatus(CharSprite.DEFAULT, Messages.get(this, "wait"));
 			}
 		}
-		resting = fullRest;
+
+		if(fullRest) resting = true;
+	}
+
+	@Override
+	public void onDodgeProc(boolean visibleFight) {
+		super.onDodgeProc(visibleFight);
+
+		if(damageInterrupt) {
+			damageInterrupt = false;
+			interrupt();
+		}
 	}
 	
 	@Override
@@ -1304,9 +1310,14 @@ public class Hero extends Char {
 		if (buff(TimekeepersHourglass.timeStasis.class) != null)
 			return;
 
-		if (!(src instanceof Hunger || src instanceof Viscosity.DeferedDamage) && damageInterrupt) {
-			interrupt();
+		if (!(src instanceof Hunger || src instanceof Viscosity.DeferedDamage)) {
+
 			resting = false;
+
+			if(damageInterrupt) {
+				interrupt();
+				damageInterrupt = false;
+			}
 		}
 
 		if (this.buff(Drowsy.class) != null){
@@ -1369,7 +1380,9 @@ public class Hero extends Char {
 			}
 		}
 	}
-	
+
+	private ArrayList<Mob> nonInterrupt = new ArrayList<>();
+
 	public void checkVisibleMobs() {
 		ArrayList<Mob> visible = new ArrayList<>();
 
@@ -1379,8 +1392,9 @@ public class Hero extends Char {
 		for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
 			if (fieldOfView[ m.pos ] && m.alignment == Alignment.ENEMY) {
 				visible.add(m);
-				if (!visibleEnemies.contains( m )) {
+				if (!visibleEnemies.contains( m ) && !nonInterrupt.contains( m )) {
 					newMob = true;
+					nonInterrupt.add(m);
 				}
 
 				if (!mindVisionEnemies.contains(m) && QuickSlotButton.autoAim(m) != -1){
@@ -1409,10 +1423,11 @@ public class Hero extends Char {
 		}
 		
 		if (newMob) {
-			interrupt();
 			if (resting){
-				Dungeon.observe();
 				resting = false;
+				Dungeon.observe();
+			} else {
+				interrupt();
 			}
 		}
 
@@ -1636,6 +1651,9 @@ public class Hero extends Char {
 			lastAction = null;
 			
 		}
+
+		damageInterrupt = true;
+		nonInterrupt.clear();
 
 		return true;
 	}

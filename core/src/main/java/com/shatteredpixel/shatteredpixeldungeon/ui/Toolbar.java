@@ -105,7 +105,7 @@ public class Toolbar extends Component {
 		}
 
 		//hidden button for quickslot selector keybind
-		add(new Button(){
+		add(new Button() {
 			@Override
 			protected void onClick() {
 				if (QuickSlotButton.targetingSlot != -1){
@@ -199,6 +199,11 @@ public class Toolbar extends Component {
 		
 		add(btnWait = new Tool(24, 0, 20, 26) {
 			@Override
+			public String buttonType() {
+				return "WAIT_BUTTON";
+			}
+
+			@Override
 			protected void onClick() {
 				if (Dungeon.hero.ready && !GameScene.cancel()) {
 					examining = false;
@@ -231,7 +236,7 @@ public class Toolbar extends Component {
 		});
 
 		//hidden button for rest keybind
-		add(new Button(){
+		add(new Button() {
 			@Override
 			protected void onClick() {
 				if (Dungeon.hero.ready && !GameScene.cancel()) {
@@ -248,7 +253,7 @@ public class Toolbar extends Component {
 		});
 
 		//hidden button for wait / pickup keybind
-		add(new Button(){
+		add(new Button() {
 			@Override
 			protected void onClick() {
 				if (Dungeon.hero.ready && !GameScene.cancel()) {

@@ -85,6 +85,11 @@ public class Hunger extends Buff implements Hero.Doom {
 				if (partialDamage > 1){
 					target.damage( (int)partialDamage, this);
 					partialDamage -= (int)partialDamage;
+
+					if(hero.HP == 1) {
+						hero.resting = false;
+						hero.interrupt();
+					}
 				}
 				
 			} else {
@@ -99,6 +104,8 @@ public class Hunger extends Buff implements Hero.Doom {
 					hero.interrupt();
 
 				} else if (newLevel >= HUNGRY && level < HUNGRY) {
+
+					hero.resting = false;
 
 					GLog.w( Messages.get(this, "onhungry") );
 

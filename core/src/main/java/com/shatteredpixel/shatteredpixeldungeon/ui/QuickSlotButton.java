@@ -106,7 +106,7 @@ public class QuickSlotButton extends Button {
 
 			@Override
 			protected void onRightClick() {
-				QuickSlotButton.this.onLongClick();
+				QuickSlotButton.this.onRightClick();
 			}
 
 			@Override
@@ -221,7 +221,8 @@ public class QuickSlotButton extends Button {
 
 	@Override
 	protected void onRightClick() {
-		onClick();
+		Dungeon.quickslot.clearSlot(slotNum);
+		refresh();
 	}
 
 	@Override

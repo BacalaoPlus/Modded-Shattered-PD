@@ -108,7 +108,7 @@ public abstract class ChampionEnemy extends Buff {
 			Buff.affect(m, buffCls);
 			m.state = m.WANDERING;
 
-			Buff.append(Dungeon.hero, TalismanOfForesight.CharAwareness.class, 3).charID = m.id();
+			Buff.append(Dungeon.hero, TalismanOfForesight.CharAwareness.class, 2).charID = m.id();
 			Dungeon.hero.resting = false;
 		}
 	}

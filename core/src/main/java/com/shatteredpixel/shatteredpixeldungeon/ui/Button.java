@@ -50,10 +50,12 @@ public class Button extends Component {
 		hotArea = new PointerArea( 0, 0, 0, 0 ) {
 			@Override
 			protected void onPointerDown( PointerEvent event ) {
-				pressed = true;
-				pressTime = 0;
-				processed = false;
-				Button.this.onPointerDown();
+				if(event.button == PointerEvent.LEFT) {
+					pressed = true;
+					pressTime = 0;
+					processed = false;
+					Button.this.onPointerDown();
+				}
 			}
 			@Override
 			protected void onPointerUp( PointerEvent event ) {
@@ -146,9 +148,9 @@ public class Button extends Component {
 		super.update();
 		
 		hotArea.active = visible;
-		
+
 		if (pressed) {
-			if ((pressTime += Game.elapsed) >= longClick) {
+			if ( (pressTime += Game.elapsed) >= (buttonType() == "WAIT_BUTTON" ? 1*longClick : longClick) ) {
 				pressed = false;
 				if (onLongClick()) {
 
@@ -169,6 +171,10 @@ public class Button extends Component {
 	protected void onMiddleClick() {}
 	protected boolean onLongClick() {
 		return false;
+	}
+
+	protected String buttonType() {
+		return "UNDEFINED";
 	}
 
 	protected String hoverText() {
