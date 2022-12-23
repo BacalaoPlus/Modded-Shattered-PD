@@ -21,6 +21,8 @@
 
 package com.watabou.utils;
 
+import static java.lang.Math.abs;
+
 public class PointF {
 	
 	public static final float PI	= 3.1415926f;
@@ -31,6 +33,8 @@ public class PointF {
 	public float y;
 	
 	public PointF() {
+		this.x = 0;
+		this.y = 0;
 	}
 	
 	public PointF( float x, float y ) {
@@ -47,6 +51,8 @@ public class PointF {
 		this.x = p.x;
 		this.y = p.y;
 	}
+
+	public static final PointF zero = new PointF(0, 0);
 	
 	public PointF clone() {
 		return new PointF( this );
@@ -99,6 +105,18 @@ public class PointF {
 		y += p.y;
 		return this;
 	}
+
+	public PointF subtract(float dx, float dy ) {
+		x -= dx;
+		y -= dy;
+		return this;
+	}
+
+	public PointF subtract(PointF p ) {
+		x -= p.x;
+		y -= p.y;
+		return this;
+	}
 	
 	public PointF negate() {
 		x = -x;
@@ -110,6 +128,15 @@ public class PointF {
 		float l = length();
 		x /= l;
 		y /= l;
+		return this;
+	}
+
+	public PointF normalizeToOne() {
+		float factor = (abs(x) > abs(y) ? abs(x) : abs(y));
+
+		x /= factor;
+		y /= factor;
+
 		return this;
 	}
 	
@@ -127,6 +154,10 @@ public class PointF {
 	
 	public static PointF diff( PointF a, PointF b ) {
 		return new PointF( a.x - b.x, a.y - b.y );
+	}
+
+	public static PointF mult( PointF a, PointF b ) {
+		return new PointF( a.x * b.x, a.y * b.y );
 	}
 	
 	public static PointF inter( PointF a, PointF b, float d ) {

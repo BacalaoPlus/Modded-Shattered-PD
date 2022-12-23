@@ -285,6 +285,8 @@ public class CellSelector extends ScrollArea {
 					zoom( camera.zoom-1 );
 					mouseZoom = camera.zoom;
 					return true;
+				} else if (action == SPDAction.PAN_HERO) {
+					camera.panFollow(Dungeon.hero.sprite, 20f);
 				}
 				
 				if (heldAction1 != SPDAction.NONE && heldAction1 == action) {
@@ -398,7 +400,7 @@ public class CellSelector extends ScrollArea {
 
 		if (cell != Dungeon.hero.pos && cell != lastCellMoved){
 			lastCellMoved = cell;
-			if (Dungeon.hero.handle( cell )) {
+			if (Dungeon.hero.handle( cell, true )) {
 				Dungeon.hero.next();
 			}
 			return true;

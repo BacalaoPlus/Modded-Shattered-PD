@@ -196,7 +196,42 @@ public class GameScene extends PixelScene {
 	{
 		inGameScene = true;
 	}
-	
+
+	public static void updateCamera() {
+		switch (SPDSettings.cameraDeadzone()) {
+			case 1: default:	Camera.main.setFollowDeadzone(0);		break;
+			case 2:				Camera.main.setFollowDeadzone(0.075f);	break;
+			case 3:				Camera.main.setFollowDeadzone(0.15f);	break;
+			case 4:				Camera.main.setFollowDeadzone(0.25f);	break;
+			case 5:				Camera.main.setFollowDeadzone(0.375f);	break;
+			case 6:				Camera.main.setFollowDeadzone(0.525f);	break;
+			case 7:				Camera.main.setFollowDeadzone(0.65f);	break;
+			case 8:				Camera.main.setFollowDeadzone(0.725f);	break;
+			case 9:				Camera.main.setFollowDeadzone(0.8f);	break;
+		}
+
+		switch (SPDSettings.cameraIntensity()) {
+			case 1:				Camera.main.setIntensityMultiplier(0.3f);	break;
+			case 2:				Camera.main.setIntensityMultiplier(0.4f);	break;
+			case 3:				Camera.main.setIntensityMultiplier(0.55f);	break;
+			case 4:				Camera.main.setIntensityMultiplier(0.75f);	break;
+			case 5: default:	Camera.main.setIntensityMultiplier(1f);		break;
+			case 6:				Camera.main.setIntensityMultiplier(1.25f);	break;
+			case 7:				Camera.main.setIntensityMultiplier(1.5f);	break;
+			case 8:				Camera.main.setIntensityMultiplier(2f);		break;
+			case 9:				Camera.main.setIntensityMultiplier(5f);		break;
+		}
+
+		switch (SPDSettings.cameraMode()) {
+			case 1: default:	Camera.main.changeCameraMode(Camera.FOLLOW);			break;
+			case 2:				Camera.main.changeCameraMode(Camera.PREDICT_FOLLOW);	break;
+			case 3:				Camera.main.changeCameraMode(Camera.SEMI_LOCKED);		break;
+			case 4:				Camera.main.changeCameraMode(Camera.LOCKED);			break;
+		}
+
+		Camera.main.panEnemies = SPDSettings.panEnemies();
+	}
+
 	@Override
 	public void create() {
 		
@@ -213,12 +248,8 @@ public class GameScene extends PixelScene {
 		Camera.main.zoom( GameMath.gate(minZoom, defaultZoom + SPDSettings.zoom(), maxZoom));
 		Camera.main.scrollable = true;
 
-		switch (SPDSettings.cameraFollow()) {
-			case 4: default:    Camera.main.setFollowDeadzone(0);      break;
-			case 3:             Camera.main.setFollowDeadzone(0.2f);   break;
-			case 2:             Camera.main.setFollowDeadzone(0.5f);   break;
-			case 1:             Camera.main.setFollowDeadzone(0.9f);   break;
-		}
+		updateCamera();
+
 
 		scene = this;
 

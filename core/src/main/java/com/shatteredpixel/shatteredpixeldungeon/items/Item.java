@@ -583,6 +583,8 @@ public class Item implements Bundlable {
 		final float delay = castDelay(user, dst);
 
 		if (enemy != null) {
+			user.onShootInitiate(enemy);
+
 			((MissileSprite) user.sprite.parent.recycle(MissileSprite.class)).
 					reset(user.sprite,
 							enemy.sprite,

@@ -90,6 +90,7 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.GameMath;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Point;
+import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 import com.watabou.utils.SparseArray;
@@ -475,7 +476,21 @@ public abstract class Level implements Bundlable {
 	public int getCell(int x, int y) {
 		return y * width + x;
 	}
-	
+
+	public PointF getPointF(int cell) {
+		int x = cell % width();
+		int y = cell / width();
+
+		return new PointF(x, y);
+	}
+
+	public Point getPoint(int cell) {
+		int x = cell % width();
+		int y = cell / width();
+
+		return new Point(x, y);
+	}
+
 	public String tilesTex() {
 		return null;
 	}

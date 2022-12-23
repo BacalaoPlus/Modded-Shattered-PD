@@ -72,6 +72,18 @@ public class Point {
 		y += d.y;
 		return this;
 	}
+
+	public Point subtract( int dx, int dy ) {
+		x -= dx;
+		y -= dy;
+		return this;
+	}
+
+	public Point subtract( Point d ) {
+		x -= d.x;
+		y -= d.y;
+		return this;
+	}
 	
 	@Override
 	public boolean equals( Object obj ) {

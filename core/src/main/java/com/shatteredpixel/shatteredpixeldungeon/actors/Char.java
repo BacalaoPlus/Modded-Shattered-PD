@@ -356,8 +356,6 @@ public abstract class Char extends Actor {
 		float dmg;
 		//
 
-
-		//check edge cases
 		if (enemy == null) return false;
 
 		if (enemy.isInvulnerable(getClass())) {
@@ -368,7 +366,6 @@ public abstract class Char extends Actor {
 			}
 			return false;
 		}
-		//
 
 
 
@@ -942,7 +939,15 @@ public abstract class Char extends Actor {
 		//The main actor thread already accounts for motion,
 		// so calling next() here isn't necessary (see Actor.process)
 	}
-	
+
+	public void onShootInitiate(Char enemy) {
+
+	}
+
+	public void onAttackInitiate(Char enemy) {
+
+	}
+
 	public void onAttackComplete() {
 		next();
 	}

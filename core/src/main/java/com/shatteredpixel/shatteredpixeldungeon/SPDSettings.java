@@ -24,7 +24,6 @@ package com.shatteredpixel.shatteredpixeldungeon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Languages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
-import com.shatteredpixel.shatteredpixeldungeon.utils.DungeonSeed;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.audio.Music;
 import com.watabou.noosa.audio.Sample;
@@ -50,13 +49,18 @@ public class SPDSettings extends GameSettings {
 	
 	//Display
 	
-	public static final String KEY_FULLSCREEN	= "fullscreen";
-	public static final String KEY_LANDSCAPE	= "landscape";
-	public static final String KEY_POWER_SAVER 	= "power_saver";
-	public static final String KEY_ZOOM			= "zoom";
-	public static final String KEY_BRIGHTNESS	= "brightness";
-	public static final String KEY_GRID 	    = "visual_grid";
-	public static final String KEY_CAMERA_FOLLOW= "camera_follow";
+	public static final String KEY_FULLSCREEN		= "fullscreen";
+	public static final String KEY_LANDSCAPE		= "landscape";
+	public static final String KEY_POWER_SAVER 		= "power_saver";
+	public static final String KEY_ZOOM				= "zoom";
+	public static final String KEY_BRIGHTNESS		= "brightness";
+	public static final String KEY_GRID 	    	= "visual_grid";
+
+	public static final String KEY_CAMERA_MODE		= "camera_mode";
+	public static final String KEY_CAMERA_DEADZONE	= "camera_deadzone";
+	public static final String KEY_CAMERA_INTENSITY	= "camera_intensity";
+	public static final String KEY_CAMERA_ENEMIES	= "camera_enemies";
+
 	
 	public static void fullscreen( boolean value ) {
 		put( KEY_FULLSCREEN, value );
@@ -118,17 +122,48 @@ public class SPDSettings extends GameSettings {
 		return getInt( KEY_GRID, 0, -1, 2 );
 	}
 
-	public static void cameraFollow( int value ){
-		put( KEY_CAMERA_FOLLOW, value );
+	public static void cameraMode( int value ){
+		put(KEY_CAMERA_MODE, value );
 		GameScene.updateMap();
+		GameScene.updateCamera();
 	}
 
-	public static int cameraFollow() {
-		return getInt( KEY_CAMERA_FOLLOW, 4, 1, 4 );
+	public static int cameraMode() {
+		return getInt(KEY_CAMERA_MODE, 1, 1, 4 );
 	}
-	
+
+	public static void cameraDeadzone(int value ){
+		put(KEY_CAMERA_DEADZONE, value );
+		GameScene.updateMap();
+		GameScene.updateCamera();
+	}
+
+	public static int cameraDeadzone() {
+		return getInt(KEY_CAMERA_DEADZONE, 1, 1, 9 );
+	}
+
+	public static void cameraIntensity( int value ) {
+		put(KEY_CAMERA_INTENSITY, value);
+		GameScene.updateMap();
+		GameScene.updateCamera();
+	}
+
+	public static int cameraIntensity() {
+		return getInt(KEY_CAMERA_INTENSITY, 5, 1, 9 );
+	}
+
+	public static void panEnemies(boolean value ) {
+		put(KEY_CAMERA_ENEMIES, value);
+		GameScene.updateMap();
+		GameScene.updateCamera();
+	}
+
+	public static boolean panEnemies() {
+		return getBoolean(KEY_CAMERA_ENEMIES, true);
+	}
+
+
 	//Interface
-
 	public static final String KEY_UI_SIZE 	    = "full_ui";
 	public static final String KEY_SCALE		= "scale";
 	public static final String KEY_QUICK_SWAP	= "quickslot_swapper";

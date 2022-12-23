@@ -36,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.CheckBox;
 import com.shatteredpixel.shatteredpixeldungeon.ui.GameLog;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.OptionSlider;
+import com.shatteredpixel.shatteredpixeldungeon.ui.OptionSwitch;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Toolbar;
@@ -62,6 +63,7 @@ public class WndSettings extends WndTabbed {
 	private static final int BTN_HEIGHT	    = 16;
 	private static final float GAP          = 1;
 
+	private CameraTab	cameraTab;
 	private DisplayTab  display;
 	private UITab       ui;
 	private InputTab    input;
@@ -77,7 +79,7 @@ public class WndSettings extends WndTabbed {
 		float height;
 
 		int width = PixelScene.landscape() ? WIDTH_L : WIDTH_P;
-
+		
 		display = new DisplayTab();
 		display.setSize(width, 0);
 		height = display.height();
@@ -92,6 +94,20 @@ public class WndSettings extends WndTabbed {
 			}
 		});
 
+		cameraTab = new CameraTab();
+		cameraTab.setSize(width, 0);
+		height = height = Math.max(height, cameraTab.height());
+		add( cameraTab );
+
+		add( new IconTab(Icons.get(Icons.DISPLAY)){
+			@Override
+			protected void select(boolean value) {
+				super.select(value);
+				cameraTab.visible = cameraTab.active = value;
+				if (value) last_index = 1;
+			}
+		});
+
 		ui = new UITab();
 		ui.setSize(width, 0);
 		height = Math.max(height, ui.height());
@@ -102,7 +118,7 @@ public class WndSettings extends WndTabbed {
 			protected void select(boolean value) {
 				super.select(value);
 				ui.visible = ui.active = value;
-				if (value) last_index = 1;
+				if (value) last_index = 2;
 			}
 		});
 
@@ -123,7 +139,7 @@ public class WndSettings extends WndTabbed {
 				protected void select(boolean value) {
 					super.select(value);
 					input.visible = input.active = value;
-					if (value) last_index = 2;
+					if (value) last_index = 3;
 				}
 			});
 		}
@@ -138,7 +154,7 @@ public class WndSettings extends WndTabbed {
 			protected void select(boolean value) {
 				super.select(value);
 				data.visible = data.active = value;
-				if (value) last_index = 3;
+				if (value) last_index = 4;
 			}
 		});
 
@@ -152,7 +168,7 @@ public class WndSettings extends WndTabbed {
 			protected void select(boolean value) {
 				super.select(value);
 				audio.visible = audio.active = value;
-				if (value) last_index = 4;
+				if (value) last_index = 5;
 			}
 		});
 
@@ -167,7 +183,7 @@ public class WndSettings extends WndTabbed {
 			protected void select(boolean value) {
 				super.select(value);
 				langs.visible = langs.active = value;
-				if (value) last_index = 5;
+				if (value) last_index = 6;
 			}
 
 			@Override
@@ -190,7 +206,7 @@ public class WndSettings extends WndTabbed {
 
 		layoutTabs();
 
-		if (tabs.size() == 5 && last_index >= 3){
+		if (tabs.size() == 6 && last_index >= 4){
 			//input tab isn't visible
 			select(last_index-1);
 		} else {
@@ -215,6 +231,110 @@ public class WndSettings extends WndTabbed {
 		});
 	}
 
+	private static class CameraTab extends Component {
+
+		RenderedTextBlock title;
+		ColorBlock sep1;
+		OptionSwitch switchCameraMode;
+		CheckBox optPanEnemies;
+		ColorBlock sep2;
+		OptionSlider optFollowIntensity;
+		OptionSlider optFollowDeadzone;
+
+		@Override
+		protected void createChildren() {
+			title = PixelScene.renderTextBlock("Camera settings", 9);
+			title.hardlight(TITLE_COLOR);
+			add(title);
+
+			sep1 = new ColorBlock(1, 1, 0xFF000000);
+			add(sep1);
+
+			ArrayList<String> labels = new ArrayList<String>();
+			labels.add("Follow");
+			labels.add("Predict Follow");
+			labels.add("Semi-locked");
+			labels.add("Locked");
+
+			switchCameraMode = new OptionSwitch( labels ) {
+				@Override
+				protected void onClick() {
+					super.onClick();
+					SPDSettings.cameraMode(state()+1);
+				}
+			};
+			switchCameraMode.setState(SPDSettings.cameraMode()-1);
+			add(switchCameraMode);
+
+			optPanEnemies = new CheckBox( "Pan enemies" ) {
+				@Override
+				protected void onClick() {
+					super.onClick();
+					SPDSettings.panEnemies(checked());
+				}
+			};
+			optPanEnemies.checked(SPDSettings.panEnemies());
+			add(optPanEnemies);
+
+			sep2 = new ColorBlock(1, 1, 0xFF000000);
+			add(sep2);
+
+			optFollowDeadzone = new OptionSlider("Follow deadzone", "None", "Wide", 1, 9) {
+				@Override
+				protected void onChange() {
+					SPDSettings.cameraDeadzone(getSelectedValue());
+				}
+			};
+			optFollowDeadzone.setSelectedValue(SPDSettings.cameraDeadzone());
+			add(optFollowDeadzone);
+
+			optFollowIntensity = new OptionSlider("Follow intensity","Slow", "Quick", 1, 9) {
+				@Override
+				protected void onChange() {
+					SPDSettings.cameraIntensity(getSelectedValue());
+				}
+			};
+			optFollowIntensity.setSelectedValue(SPDSettings.cameraIntensity());
+			add(optFollowIntensity);
+
+		}
+
+		@Override
+		protected void layout() {
+
+			float bottom = y;
+
+			title.setPos((width - title.width())/2, bottom + GAP);
+			sep1.size(width, 1);
+			sep1.y = title.bottom() + 3*GAP;
+
+			bottom = sep1.y + GAP;
+
+			if(width > 200) {
+				switchCameraMode.setRect(0, bottom + GAP, width/2-GAP/2, BTN_HEIGHT);
+				optPanEnemies.setRect(switchCameraMode.right()+GAP, bottom + GAP, width/2-GAP/2, BTN_HEIGHT);
+			} else {
+				switchCameraMode.setRect(0, bottom + GAP, width, BTN_HEIGHT);
+				optPanEnemies.setRect(0, switchCameraMode.bottom() + GAP, width, BTN_HEIGHT);
+			}
+
+			bottom = optPanEnemies.bottom();
+
+			sep2.y = bottom + GAP;
+			sep2.size(width, 1);
+
+			bottom = sep2.y + GAP;
+
+			optFollowDeadzone.setRect(0, bottom, width, SLIDER_HEIGHT);
+			bottom = optFollowDeadzone.bottom() + GAP;
+
+			optFollowIntensity.setRect(0, bottom, width, SLIDER_HEIGHT);
+
+			height = optFollowIntensity.bottom();
+		}
+
+	}
+	
 	private static class DisplayTab extends Component {
 
 		RenderedTextBlock title;
@@ -226,7 +346,6 @@ public class WndSettings extends WndTabbed {
 		ColorBlock sep2;
 		OptionSlider optBrightness;
 		OptionSlider optVisGrid;
-		OptionSlider optFollowIntensity;
 
 		@Override
 		protected void createChildren() {
@@ -321,16 +440,6 @@ public class WndSettings extends WndTabbed {
 			optVisGrid.setSelectedValue(SPDSettings.visualGrid());
 			add(optVisGrid);
 
-			optFollowIntensity = new OptionSlider(Messages.get(this, "camera_follow"),
-					Messages.get(this, "low"), Messages.get(this, "high"), 1, 4) {
-				@Override
-				protected void onChange() {
-					SPDSettings.cameraFollow(getSelectedValue());
-				}
-			};
-			optFollowIntensity.setSelectedValue(SPDSettings.cameraFollow());
-			add(optFollowIntensity);
-
 		}
 
 		@Override
@@ -380,9 +489,7 @@ public class WndSettings extends WndTabbed {
 				optVisGrid.setRect(0, optBrightness.bottom() + GAP, width, SLIDER_HEIGHT);
 			}
 
-			optFollowIntensity.setRect(0, optVisGrid.bottom() + GAP, width, SLIDER_HEIGHT);
-
-			height = optFollowIntensity.bottom();
+			height = optVisGrid.bottom();
 		}
 
 	}

@@ -103,11 +103,19 @@ public class HeroSprite extends CharSprite {
 
 	@Override
 	public void move( int from, int to ) {
+		move(from, to, false);
+	}
+
+	public void move( int from, int to, boolean movementByKeys ) {
 		super.move( from, to );
 		if (ch != null && ch.flying) {
 			play( fly );
 		}
-		Camera.main.panFollow(this, 20f);
+
+		PointF movement = PointF.diff(Dungeon.level.getPointF(to), Dungeon.level.getPointF(from));
+
+		Camera.main.panFollowHero(this, 20f, movement, true);
+
 	}
 
 	@Override

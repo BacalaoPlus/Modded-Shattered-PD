@@ -22,16 +22,41 @@
 package com.watabou.noosa;
 
 import com.watabou.glwrap.Matrix;
+import com.watabou.input.GameAction;
+import com.watabou.input.KeyBindings;
+import com.watabou.input.KeyEvent;
 import com.watabou.utils.Point;
 import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
+import com.watabou.utils.Signal;
 
 import java.util.ArrayList;
 
 public class Camera extends Gizmo {
 
 	private static ArrayList<Camera> all = new ArrayList<>();
-	
+
+	public boolean panEnemies = false;
+
+	public String cameraMode;
+
+	public static final String FOLLOW				= "follow";
+	public static final String PREDICT_FOLLOW		= "predictFollow";
+	public static final String SEMI_LOCKED			= "semiLocked";
+	public static final String LOCKED				= "locked";
+
+	public void changeCameraMode(String newCameraMode) {
+		cameraMode = newCameraMode;
+
+		resetFollow();
+	}
+
+	private void resetFollow() {
+		shift = new PointF();
+		lastMove = new PointF();
+		followTarget = null;
+	}
+
 	protected static float invW2;
 	protected static float invH2;
 	
@@ -45,6 +70,8 @@ public class Camera extends Gizmo {
 	public int y;
 	public int width;
 	public int height;
+
+	public static float TILE = 16f;
 	
 	int screenWidth;
 	int screenHeight;
@@ -54,6 +81,11 @@ public class Camera extends Gizmo {
 	public boolean scrollable = false;
 	public PointF scroll;
 	public PointF centerOffset;
+
+	//used for predict follow
+	public PointF lastMove = new PointF();
+	//used for semi locked
+	public PointF shift = new PointF();
 	
 	private float shakeMagX		= 10f;
 	private float shakeMagY		= 10f;
@@ -68,7 +100,6 @@ public class Camera extends Gizmo {
 	}
 	
 	public static synchronized Camera reset( Camera newCamera ) {
-		
 		invW2 = 2f / Game.width;
 		invH2 = 2f / Game.height;
 		
@@ -119,7 +150,8 @@ public class Camera extends Gizmo {
 		this.width = width;
 		this.height = height;
 		this.zoom = zoom;
-		
+		changeCameraMode(FOLLOW);
+
 		screenWidth = (int)(width * zoom);
 		screenHeight = (int)(height * zoom);
 		
@@ -166,47 +198,81 @@ public class Camera extends Gizmo {
 	//keep in mind though that this speed is constantly decreasing, so actual pan time is higher
 	float panIntensity = 0f;
 
+	float intensityMultiplier = 1f;
+
 	//what percentage of the screen to ignore when follow panning.
 	// 0% means always keep in the center, 50% would mean pan until target is within center 50% of screen
+	//if predict follow is active, this is the percentage of screen to move past the target
 	float followDeadzone = 0f;
-	
+
+	private void calculateFollowTarget() {
+		float deadX = width * followDeadzone /2f;
+		float deadY = height * followDeadzone /2f;
+
+		PointF deadP = new PointF(deadX, deadY);
+
+		if(cameraMode == FOLLOW) {
+
+			panTarget = followTarget.center().offset(centerOffset);
+
+			//--
+			panTarget.offset(scrollToCenter(scroll).negate());
+
+			if (panTarget.x > deadX){
+				panTarget.x -= deadX;
+			} else if (panTarget.x < -deadX){
+				panTarget.x += deadX;
+			} else {
+				panTarget.x = 0;
+			}
+
+			if (panTarget.y > deadY){
+				panTarget.y -= deadY;
+			} else if (panTarget.y < -deadY){
+				panTarget.y += deadY;
+			} else {
+				panTarget.y = 0;
+			}
+
+			panTarget.offset(scrollToCenter(scroll));
+			//--
+		} else if(cameraMode == PREDICT_FOLLOW) {
+			panTarget = followTarget.center().offset(centerOffset);
+
+			//lastMove.normalize();
+			shift = PointF.mult(lastMove, deadP);
+			shift.scale(0.5f);
+
+			panTarget.offset(shift);
+
+		} else if(cameraMode == SEMI_LOCKED) {
+			panTarget = scrollToCenter(scroll);
+			panTarget.offset(shift);
+
+		} else if(cameraMode == LOCKED) {
+			//do nothing
+		}
+	}
+
 	@Override
 	public void update() {
 		super.update();
 
-		float deadX = 0;
-		float deadY = 0;
-		if (followTarget != null){
-			panTarget = followTarget.center().offset(centerOffset);
-			deadX = width * followDeadzone /2f;
-			deadY = height * followDeadzone /2f;
+		if (followTarget != null) {
+			calculateFollowTarget();
 		}
-		
+
+		PointF panMove = new PointF();
+
 		if (panIntensity > 0f){
-
-			PointF panMove = new PointF();
-			panMove.x = panTarget.x - (scroll.x + width/2f);
-			panMove.y = panTarget.y - (scroll.y + height/2f);
-
-			if (panMove.x > deadX){
-				panMove.x -= deadX;
-			} else if (panMove.x < -deadX){
-				panMove.x += deadX;
-			} else {
-				panMove.x = 0;
-			}
-
-			if (panMove.y > deadY){
-				panMove.y -= deadY;
-			} else if (panMove.y < -deadY){
-				panMove.y += deadY;
-			} else {
-				panMove.y = 0;
-			}
-
+			panMove = PointF.diff(panTarget, scrollToCenter(scroll));
 			panMove.scale(Math.min(1f, Game.elapsed * panIntensity));
 
 			scroll.offset(panMove);
+		}
+
+		if(cameraMode == SEMI_LOCKED && followTarget != null) {
+			shift.subtract(panMove);
 		}
 		
 		if ((shakeTime -= Game.elapsed) > 0) {
@@ -231,7 +297,9 @@ public class Camera extends Gizmo {
 	
 	public void shift( PointF point ){
 		scroll.offset(point);
+
 		panIntensity = 0f;
+		resetFollow();
 	}
 
 	public void setCenterOffset( float x, float y ){
@@ -247,26 +315,79 @@ public class Camera extends Gizmo {
 	public void snapTo(float x, float y ) {
 		scroll.set( x - width / 2, y - height / 2 ).offset(centerOffset);
 		panIntensity = 0f;
-		followTarget = null;
+
+		resetFollow();
 	}
 	
 	public void snapTo(PointF point ) {
 		snapTo( point.x, point.y );
 	}
-	
+
 	public void panTo( PointF dst, float intensity ){
 		panTarget = dst.offset(centerOffset);
 		panIntensity = intensity;
-		followTarget = null;
+
+		resetFollow();
 	}
-	
+
+	private PointF scrollToCenter(PointF p) {
+		PointF newP = p.clone();
+		newP.offset(new PointF(width/2f, height/2f));
+
+		return newP;
+	}
+
 	public void panFollow(Visual target, float intensity ){
+
+		resetFollow();
+
 		followTarget = target;
 		panIntensity = intensity;
 	}
 
+	public void panFollowHero(Visual target, float intensity, PointF panDirection ){
+		panFollowHero(target, intensity, panDirection, false);
+	}
+
+	public void panFollowHero(Visual target, float intensity, PointF panDirection, boolean movement ){
+
+		followTarget = target;
+		panIntensity = intensity * intensityMultiplier;
+
+		if (cameraMode == FOLLOW) {
+			//do nothing
+		}
+		else if(cameraMode == PREDICT_FOLLOW) {
+			panIntensity /= 4f;
+
+			lastMove = panDirection;
+		}
+		else if(cameraMode == SEMI_LOCKED) {
+			if(movement) {
+				lastMove = panDirection;
+				shift.offset(lastMove.scale(Camera.TILE));
+			}
+		}
+		else if (cameraMode == LOCKED) {
+			panTarget = scrollToCenter(scroll);
+		}
+	}
+
+	public void panEnemies(Point[] positions, float intensity) {
+		if(panEnemies && positions.length > 0) {
+			PointF middlePoint = getMiddlePoint(positions);
+			middlePoint.scale(Camera.TILE);
+
+			panTo(middlePoint, intensity);
+		}
+	}
+
 	public void setFollowDeadzone( float deadzone ){
 		followDeadzone = deadzone;
+	}
+
+	public void setIntensityMultiplier(float intensityMultiplier) {
+		this.intensityMultiplier = intensityMultiplier;
 	}
 	
 	public PointF screenToCamera( int x, int y ) {
@@ -309,5 +430,20 @@ public class Camera extends Gizmo {
 	public void shake( float magnitude, float duration ) {
 		shakeMagX = shakeMagY = magnitude;
 		shakeTime = shakeDuration = duration;
+	}
+
+	private PointF getMiddlePoint(Point[] positions) {
+		int size = positions.length;
+
+		Point sumOfAll = new Point();
+
+		for (int i = 0; i < positions.length; i++) {
+			sumOfAll.offset(positions[i]);
+		}
+
+		PointF middlePoint = new PointF(sumOfAll);
+		middlePoint.scale(1f/size);
+
+		return middlePoint;
 	}
 }

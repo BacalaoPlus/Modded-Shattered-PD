@@ -126,7 +126,6 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.ShadowCaster;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.plants.Earthroot;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.AlchemyScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -154,6 +153,7 @@ import com.watabou.utils.Callback;
 import com.watabou.utils.GameMath;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Point;
+import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
@@ -219,6 +219,7 @@ public class Hero extends Char {
 	public ArrayList<Mob> mindVisionEnemies = new ArrayList<>();
 
 	public int trampledItemLast = 0;
+	private boolean movementByKeys = false;
 
 	public Hero() {
 		super();
@@ -485,6 +486,13 @@ public class Hero extends Char {
 			spend( TIME_TO_PICK_UP );
 	}
 	*/
+
+	@Override
+	public void onShootInitiate(Char enemy) {
+		PointF movement = PointF.diff(Dungeon.level.getPointF(enemy.pos), Dungeon.level.getPointF(pos));
+		movement.normalizeToOne();
+		Camera.main.panFollowHero(this.sprite, 20f, movement);
+	}
 
 	public boolean shoot( Char enemy, MissileWeapon wep ) {
 
@@ -1194,7 +1202,8 @@ public class Hero extends Char {
 		enemy = action.target;
 
 		if (enemy.isAlive() && canAttack( enemy ) && !isCharmedBy( enemy ) && enemy.invisible == 0) {
-			
+
+			onAttackInitiate(enemy);
 			sprite.attack( enemy.pos );
 
 			return false;
@@ -1382,19 +1391,20 @@ public class Hero extends Char {
 	}
 
 	private ArrayList<Mob> nonInterrupt = new ArrayList<>();
+	private ArrayList<Mob> alreadyEncountered = new ArrayList<>();
 
 	public void checkVisibleMobs() {
 		ArrayList<Mob> visible = new ArrayList<>();
-
-		boolean newMob = false;
+		ArrayList<Mob> spottedEnemies = new ArrayList<>();
 
 		Mob target = null;
 		for (Mob m : Dungeon.level.mobs.toArray(new Mob[0])) {
 			if (fieldOfView[ m.pos ] && m.alignment == Alignment.ENEMY) {
 				visible.add(m);
+
 				if (!visibleEnemies.contains( m ) && !nonInterrupt.contains( m )) {
-					newMob = true;
 					nonInterrupt.add(m);
+					spottedEnemies.add(m);
 				}
 
 				if (!mindVisionEnemies.contains(m) && QuickSlotButton.autoAim(m) != -1){
@@ -1422,13 +1432,29 @@ public class Hero extends Char {
 			QuickSlotButton.target(target);
 		}
 		
-		if (newMob) {
+		if (!spottedEnemies.isEmpty()) {
 			if (resting){
 				resting = false;
 				Dungeon.observe();
 			} else {
 				interrupt();
 			}
+
+			ArrayList<Mob> discoveredEnemies = new ArrayList<Mob>();
+			for(Mob m : spottedEnemies) {
+				if(!alreadyEncountered.contains(m)) {
+
+					alreadyEncountered.add(m);
+					discoveredEnemies.add(m);
+				}
+			}
+
+			Point[] positions = new Point[discoveredEnemies.size()];
+			for (int i = 0; i < discoveredEnemies.size(); i++) {
+				positions[i] = Dungeon.level.getPoint(discoveredEnemies.get(i).pos);
+			}
+
+			Camera.main.panEnemies(positions, 10f);
 		}
 
 		visibleEnemies = visible;
@@ -1563,8 +1589,9 @@ public class Hero extends Char {
 
 			float speed = speed();
 
-			sprite.move(pos, step);
+			int oldPos = pos;
 			move(step);
+			((HeroSprite)sprite).move(oldPos, pos, movementByKeys);
 
 			spend( 1 / speed );
 			justMoved = true;
@@ -1580,12 +1607,17 @@ public class Hero extends Char {
 		}
 
 	}
-	
-	public boolean handle( int cell ) {
+
+	public boolean handle (int cell) {
+		return handle(cell, false);
+	}
+
+	public boolean handle( int cell, boolean movementByKeys ) {
 
 		if (cell == -1) {
 			return false;
 		}
+		this.movementByKeys = movementByKeys;
 
 		if (fieldOfView == null || fieldOfView.length != Dungeon.level.length()){
 			fieldOfView = new boolean[Dungeon.level.length()];
@@ -1646,7 +1678,22 @@ public class Hero extends Char {
 			} else {
 				walkingToVisibleTrapInFog = false;
 			}
-			
+
+			if(movementByKeys && !Dungeon.level.passable[cell]) {
+				Point movement = Dungeon.level.getPoint(cell).subtract(Dungeon.level.getPoint(pos));
+
+				int cellX = pos + movement.x;
+				int cellY = pos + movement.y * Dungeon.level.width();
+
+				if (Dungeon.level.passable[cellX] && !Dungeon.level.passable[cellY]) {
+					cell = cellX;
+				} else if (!Dungeon.level.passable[cellX] && Dungeon.level.passable[cellY]) {
+					cell = cellY;
+				} else {
+					//do nothing
+				}
+			}
+
 			curAction = new HeroAction.Move( cell );
 			lastAction = null;
 			
@@ -1972,15 +2019,24 @@ public class Hero extends Char {
 			}
 		}
 	}
-	
+
+	@Override
+	public void onAttackInitiate(Char enemy) {
+		PointF panDirection = PointF.diff(Dungeon.level.getPointF(enemy.pos), Dungeon.level.getPointF(pos));
+		panDirection.normalizeToOne();
+		Camera.main.panFollowHero(this.sprite, 20f, panDirection);
+	}
+
 	@Override
 	public void onAttackComplete() {
-		
+
 		AttackIndicator.target(enemy);
+
 		boolean wasEnemy = enemy.alignment == Alignment.ENEMY;
 
 		boolean hit = attack( enemy );
 		
+
 		Invisibility.dispel();
 		spend( attackDelay() );
 
