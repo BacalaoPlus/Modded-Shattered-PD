@@ -41,7 +41,6 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
-import com.shatteredpixel.shatteredpixeldungeon.ui.InventoryPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.particles.Emitter;
@@ -71,10 +70,10 @@ public class Item implements Bundlable {
 	
 	public boolean stackable = false;
 	protected int quantity = 1;
-	public boolean dropsDownHeap = false;
+	public boolean onTopOfHeapAlways = false;
 	
 	private int level = 0;
-	protected Heap heapAssigned = null;
+	public Heap heapAssigned = null;
 
 	protected int pickUpPos() {
 		return (heapAssigned == null ? Dungeon.hero.pos : heapAssigned.pos);
@@ -93,7 +92,7 @@ public class Item implements Bundlable {
 
 	// whether an item can be included in heroes remains
 	public boolean bones = false;
-	
+
 	public static final Comparator<Item> itemComparator = new Comparator<Item>() {
 		@Override
 		public int compare( Item lhs, Item rhs ) {
@@ -114,6 +113,9 @@ public class Item implements Bundlable {
 
 	public void assignHeap(int cell) {
 		heapAssigned = Dungeon.level.heaps.get(cell);
+	}
+	public void assignHeap(Heap heap) {
+		heapAssigned = heap;
 	}
 
 	public boolean doPickUp( ) {
@@ -171,7 +173,7 @@ public class Item implements Bundlable {
 	}
 	
 	protected void onThrow( int cell ) {
-		Heap heap = Dungeon.level.drop( this, cell );
+		Dungeon.level.drop( this, cell );
 	}
 	
 	//takes two items and merges them (if possible)
@@ -240,7 +242,7 @@ public class Item implements Bundlable {
 		return collect( Dungeon.hero.belongings.backpack );
 	}
 	
-	//returns a new item if the split was sucessful and there are now 2 items, otherwise null
+	//returns a new item if the split was successful and there are now 2 items, otherwise null
 	public Item split( int amount ){
 		if (amount <= 0 || amount >= quantity()) {
 			return null;

@@ -467,7 +467,7 @@ public class DriedRose extends Artifact {
 
 		{
 			stackable = true;
-			dropsDownHeap = true;
+			onTopOfHeapAlways = true;
 			
 			image = ItemSpriteSheet.PETAL;
 		}

@@ -45,7 +45,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
@@ -142,7 +141,15 @@ public class Heap implements Bundlable {
 	public Item peek() {
 		return items.peek();
 	}
-	
+
+	public Item get(int index) {
+		if(index > size()-1 || index < 0) {
+			return null;
+		} else {
+			return items.get(index);
+		}
+	}
+
 	public void drop( Item item ) {
 		
 		if (item.stackable && type != Type.FOR_SALE) {
@@ -158,11 +165,13 @@ public class Heap implements Bundlable {
 		}
 
 		//lost backpack must always be on top of a heap
-		if ((item.dropsDownHeap && type != Type.FOR_SALE) || peek() instanceof LostBackpack) {
+		if ((item.onTopOfHeapAlways && type != Type.FOR_SALE) || peek() instanceof LostBackpack) {
 			items.addFirst( item );
 		} else {
 			items.add( item );
 		}
+
+		item.assignHeap(this);
 		
 		if (sprite != null) {
 			sprite.view(this).place( pos );

@@ -162,18 +162,20 @@ import java.util.LinkedHashMap;
 
 public class Hero extends Char {
 
+	//Used for tracking function calls between other things
+	public int DEBUG = 0;
+
+
 	{
 		actPriority = HERO_PRIO;
 		
 		alignment = Alignment.ALLY;
 	}
 
-	//DEBUGGING
-	public int DEBUG = 0;
-
 	public static final int MAX_LEVEL = 30;
 
-	public static final int STARTING_STR = 10;
+	public static final int STARTING_STR = (Dungeon.DEBUG_MODE ? 1000 : 10);
+	public static final int STARTING_HT = (Dungeon.DEBUG_MODE ? 20000 : 20);
 	
 	private static final float TIME_TO_REST		    = 1f;
 	private static final float TIME_TO_SEARCH	    = 2f;
@@ -189,8 +191,8 @@ public class Hero extends Char {
 	public ArrayList<LinkedHashMap<Talent, Integer>> talents = new ArrayList<>();
 	public LinkedHashMap<Talent, Talent> metamorphedTalents = new LinkedHashMap<>();
 	
-	private int attackSkill = 10;
-	private int defenseSkill = 5;
+	private int attackSkill = (Dungeon.DEBUG_MODE ? INFINITE_ACCURACY : 10);
+	private int defenseSkill = (Dungeon.DEBUG_MODE ? 5 : 5);
 
 	public boolean ready = false;
 	private boolean damageInterrupt = true;
@@ -224,7 +226,7 @@ public class Hero extends Char {
 	public Hero() {
 		super();
 
-		HP = HT = 20;
+		HP = HT = STARTING_HT;
 		STR = STARTING_STR;
 		
 		belongings = new Belongings( this );
@@ -234,8 +236,8 @@ public class Hero extends Char {
 	
 	public void updateHT( boolean boostHP ){
 		int curHT = HT;
-		
-		HT = 20 + 5*(lvl-1) + HTBoost;
+
+		HT = STARTING_HT + 5*(lvl-1) + HTBoost;
 		float multiplier = RingOfMight.HTMultiplier(this);
 		HT = Math.round(multiplier * HT);
 		

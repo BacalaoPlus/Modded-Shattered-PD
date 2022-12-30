@@ -63,8 +63,6 @@ import java.util.LinkedHashMap;
 
 public class Bomb extends Item {
 
-
-
 	{
 		image = ItemSpriteSheet.BOMB;
 
@@ -111,7 +109,8 @@ public class Bomb extends Item {
 	@Override
 	protected void onThrow( int cell ) {
 		if (!Dungeon.level.pit[ cell ] && lightingFuse) {
-			Actor.addDelayed(fuse = new Fuse().ignite(this), 2);
+			Actor.addDelayed(fuse = new Fuse().ignite(this), 3);
+			onTopOfHeapAlways = true;
 		}
 		if (Actor.findChar( cell ) != null && !(Actor.findChar( cell ) instanceof Hero) ){
 			ArrayList<Integer> candidates = new ArrayList<>();

@@ -92,6 +92,9 @@ import java.util.TimeZone;
 
 public class Dungeon {
 
+	//DEBUG MODE, used for testing, should always be set to false on official releases.
+	public static final boolean DEBUG_MODE = false;
+
 	//enum of items which have limited spawns, records how many have spawned
 	//could all be their own separate numbers, but this allows iterating, much nicer for bundling/initializing.
 	public static enum LimitedDrops {
@@ -243,7 +246,7 @@ public class Dungeon {
 		QuickSlotButton.reset();
 		Toolbar.swappedQuickslots = false;
 		
-		depth = 1;
+		depth = (DEBUG_MODE ? 10 : 1);
 		branch = 0;
 
 		gold = 0;

@@ -991,6 +991,11 @@ public class GameScene extends PixelScene {
 			scene.addBlobSprite( gas );
 		}
 	}
+
+	public static void remove( Blob gas ) {
+		Actor.remove( gas );
+
+	}
 	
 	public static void add( Heap heap ) {
 		if (scene != null) {

@@ -38,7 +38,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Doom;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LockedFloor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Terror;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
@@ -81,7 +80,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 public class Tengu extends Mob {
-	
+
+	private final int DEBUG_ThresholdMult = (Dungeon.DEBUG_MODE ? 100 : 1);
+
 	{
 		spriteClass = TenguSprite.class;
 		
@@ -456,13 +457,14 @@ public class Tengu extends Mob {
 		} else {
 			
 			abilityCooldown--;
-			
-			if (targetAbilityUses() - abilitiesUsed >= 4 && !Dungeon.isChallenged(Challenges.STRONGER_BOSSES)){
+
+			//on Debug Mode throw abilities more slowly
+			if (targetAbilityUses() - abilitiesUsed >= (4 * DEBUG_ThresholdMult) && !Dungeon.isChallenged(Challenges.STRONGER_BOSSES)){
 				//Very behind in ability uses, use one right away!
 				//but not on bosses challenge, we already cast quickly then
 				abilityCooldown = 0;
-				
-			} else if (targetAbilityUses() - abilitiesUsed >= 3){
+
+			} else if (targetAbilityUses() - abilitiesUsed >= (3 * DEBUG_ThresholdMult)){
 				//moderately behind in uses, use one every other action.
 				if (abilityCooldown == -1 || abilityCooldown > 1) abilityCooldown = 1;
 				
@@ -483,10 +485,11 @@ public class Tengu extends Mob {
 		//1 base ability use, plus 2 uses per jump
 		int targetAbilityUses = 1 + 2*arenaJumps;
 		
-		//and ane extra 2 use for jumps 3 and 4
+		//and an extra 2 use for jumps 3 and 4
 		targetAbilityUses += Math.max(0, arenaJumps-2);
-		
-		return targetAbilityUses;
+
+		//on Debug Mode throw abilities for longer
+		return targetAbilityUses * (DEBUG_ThresholdMult);
 	}
 	
 	public boolean useAbility(){
@@ -597,18 +600,55 @@ public class Tengu extends Mob {
 	}
 	
 	public static class BombAbility extends Buff {
-		
+
+		public BombItem bombAssigned = null;
+
 		public int bombPos = -1;
 		private int timer = 3;
 
 		private ArrayList<Emitter> smokeEmitters = new ArrayList<>();
-		
+
+		public void detach(boolean explosionFx) {
+			if(explosionFx) {
+				if (target.sprite != null) fx( false );
+			} else {
+				for (Emitter e : smokeEmitters){
+					e.burst(SmokeParticle.FACTORY, 5);
+				}
+			}
+
+			target.remove( this );
+		}
+
+		private void explode() {
+			PathFinder.buildDistanceMap( bombPos, BArray.not( Dungeon.level.solid, null ), 2 );
+			for (int cell = 0; cell < PathFinder.distance.length; cell++) {
+
+				if (PathFinder.distance[cell] < Integer.MAX_VALUE) {
+					Char ch = Actor.findChar(cell);
+					if (ch != null && !(ch instanceof Tengu)) {
+						int dmg = Random.NormalIntRange(5 + Dungeon.scalingDepth(), 10 + Dungeon.scalingDepth() * 2);
+						dmg -= ch.drRoll();
+
+						if (dmg > 0) {
+							ch.damage(dmg, Bomb.class);
+						}
+
+						if (ch == Dungeon.hero) {
+							Statistics.qualifiedForBossChallengeBadge = false;
+							Statistics.bossScores[1] -= 100;
+
+							if (!ch.isAlive()) {
+								Dungeon.fail(Tengu.class);
+							}
+						}
+					}
+				}
+			}
+		}
+
 		@Override
 		public boolean act() {
-
-			if (smokeEmitters.isEmpty()){
-				fx(true);
-			}
 			
 			PointF p = DungeonTilemap.raisedTileCenterToWorld(bombPos);
 			if (timer == 3) {
@@ -618,43 +658,17 @@ public class Tengu extends Mob {
 			} else if (timer == 1){
 				FloatingText.show(p.x, p.y, bombPos, "1...", CharSprite.NEGATIVE);
 			} else {
-				PathFinder.buildDistanceMap( bombPos, BArray.not( Dungeon.level.solid, null ), 2 );
-				for (int cell = 0; cell < PathFinder.distance.length; cell++) {
 
-					if (PathFinder.distance[cell] < Integer.MAX_VALUE) {
-						Char ch = Actor.findChar(cell);
-						if (ch != null && !(ch instanceof Tengu)) {
-							int dmg = Random.NormalIntRange(5 + Dungeon.scalingDepth(), 10 + Dungeon.scalingDepth() * 2);
-							dmg -= ch.drRoll();
-
-							if (dmg > 0) {
-								ch.damage(dmg, Bomb.class);
-							}
-
-							if (ch == Dungeon.hero){
-								Statistics.qualifiedForBossChallengeBadge = false;
-								Statistics.bossScores[1] -= 100;
-
-								if (!ch.isAlive()) {
-									Dungeon.fail(Tengu.class);
-								}
-							}
-						}
-
-						Heap h = Dungeon.level.heaps.get(cell);
-						if (h != null) {
-							for (Item i : h.items.toArray(new Item[0])) {
-								if (i instanceof BombItem) {
-									h.remove(i);
-								}
-							}
-						}
-					}
-
-				}
+				explode();
 				Sample.INSTANCE.play(Assets.Sounds.BLAST);
-				detach();
+
+				bombAssigned.deactivate(true);
+
 				return true;
+			}
+
+			if (smokeEmitters.isEmpty()){
+				fx(true);
 			}
 			
 			timer--;
@@ -698,9 +712,11 @@ public class Tengu extends Mob {
 		}
 		
 		public static class BombItem extends Item {
-			
+
+			BombAbility bombFuse = null;
+
 			{
-				dropsDownHeap = true;
+				onTopOfHeapAlways = true;
 				unique = true;
 				
 				image = ItemSpriteSheet.TENGU_BOMB;
@@ -715,11 +731,35 @@ public class Tengu extends Mob {
 			@Override
 			protected void onThrow(int cell) {
 				super.onThrow(cell);
+
 				if (throwingChar != null){
-					Buff.append(throwingChar, BombAbility.class).bombPos = cell;
+					bombFuse = Buff.append(throwingChar, BombAbility.class);
 					throwingChar = null;
 				} else {
-					Buff.append(curUser, BombAbility.class).bombPos = cell;
+					bombFuse = Buff.append(curUser, BombAbility.class);
+				}
+
+				if (bombFuse != null) {
+					bombFuse.bombAssigned = this;
+					bombFuse.bombPos = cell;
+				}
+			}
+
+			public void deactivate(boolean fx) {
+				if(!fx) {
+					Emitter emitter = CellEmitter.center(heapAssigned.pos);
+					emitter.burst(SmokeParticle.FACTORY, 5);
+				}
+
+				bombFuse.detach(fx);
+
+				Heap h = heapAssigned;
+				if (h != null) {
+					for (Item i : h.items.toArray(new Item[0])) {
+						if (i instanceof BombItem) {
+							h.remove(i);
+						}
+					}
 				}
 			}
 			
@@ -745,7 +785,11 @@ public class Tengu extends Mob {
 		for (int i = 0; i < PathFinder.CIRCLE8.length; i++){
 			if (aim.sourcePos+PathFinder.CIRCLE8[i] == aim.path.get(1)){
 				thrower.sprite.zap(target.pos);
-				Buff.append(thrower, Tengu.FireAbility.class).direction = i;
+
+				FireAbility fire = Buff.append(thrower, Tengu.FireAbility.class);
+				fire.direction = i;
+
+				FireAbility.instances.add(fire);
 				
 				thrower.sprite.emitter().start(Speck.factory(Speck.STEAM), .03f, 10);
 				return true;
@@ -758,10 +802,46 @@ public class Tengu extends Mob {
 	public static class FireAbility extends Buff {
 		
 		public int direction;
-		private int[] curCells;
+		public int[] curCells;
+
+		public static ArrayList<FireAbility> instances = new ArrayList<>();
 		
 		HashSet<Integer> toCells = new HashSet<>();
-		
+
+		public boolean clearCells(boolean[] cells) {
+			boolean remove = false;
+
+			HashSet<Integer> newCells = new HashSet<>();
+
+			for(Integer i : curCells) {
+				if(!cells[i]) {
+					newCells.add(i);
+				} else {
+					Blob fireBlob = Dungeon.level.blobs.get(FireBlob.class);
+					fireBlob.clear(i);
+
+					Emitter emitter = CellEmitter.center(i);
+					emitter.burst(SmokeParticle.FACTORY, 5);
+				}
+			}
+
+			curCells = new int[newCells.size()];
+
+			int i = 0;
+			for (Integer n : newCells){
+				curCells[i] = n;
+				i++;
+			}
+
+
+			if(newCells.isEmpty()) {
+				detach();
+				remove = true;
+			}
+
+			return remove;
+		}
+
 		@Override
 		public boolean act() {
 
@@ -783,6 +863,7 @@ public class Tengu extends Mob {
 			}
 			
 			if (toCells.isEmpty()){
+				instances.remove(this);
 				detach();
 			} else {
 				curCells = new int[toCells.size()];
@@ -954,10 +1035,40 @@ public class Tengu extends Mob {
 	}
 	
 	public static class ShockerAbility extends Buff {
-	
+
 		public int shockerPos;
+		private ShockerItem assignedShocker = null;
 		private Boolean shockingOrdinals = null;
-		
+
+		public void deactivate() {
+			Heap h = assignedShocker.heapAssigned;
+
+			Emitter emitter = CellEmitter.center(h.pos);
+			emitter.burst(SmokeParticle.FACTORY, 5);
+
+			for (int i = (!shockingOrdinals) ? 0 : 1; i < PathFinder.CIRCLE8.length; i += 2){
+				if (!Dungeon.level.solid[shockerPos+PathFinder.CIRCLE8[i]]) {
+					emitter = CellEmitter.center(shockerPos + PathFinder.CIRCLE8[i]);
+					emitter.burst(SmokeParticle.FACTORY, 5);
+				}
+			}
+
+			if (h != null) {
+				for (Item i : h.items.toArray(new Item[0])) {
+					if (i instanceof ShockerAbility.ShockerItem) {
+						h.remove(i);
+					}
+				}
+			}
+
+			Blob shockerBlob = Dungeon.level.blobs.get(ShockerBlob.class);
+			for (int offset : PathFinder.NEIGHBOURS9) {
+				shockerBlob.clear(shockerPos + offset);
+			}
+
+			detach();
+		}
+
 		@Override
 		public boolean act() {
 			
@@ -973,7 +1084,7 @@ public class Tengu extends Mob {
 				if (Dungeon.level.distance(Dungeon.hero.pos, shockerPos) <= 1){
 					Sample.INSTANCE.play( Assets.Sounds.LIGHTNING );
 				}
-				
+
 				shockingOrdinals = false;
 				spreadblob();
 			} else {
@@ -984,7 +1095,7 @@ public class Tengu extends Mob {
 				if (Dungeon.level.distance(Dungeon.hero.pos, shockerPos) <= 1){
 					Sample.INSTANCE.play( Assets.Sounds.LIGHTNING );
 				}
-				
+
 				shockingOrdinals = true;
 				spreadblob();
 			}
@@ -1081,12 +1192,20 @@ public class Tengu extends Mob {
 		}
 		
 		public static class ShockerItem extends Item {
-			
+
+			Tengu.ShockerAbility shockerAbility = null;
+
 			{
-				dropsDownHeap = true;
+				onTopOfHeapAlways = true;
 				unique = true;
 				
 				image = ItemSpriteSheet.TENGU_SHOCKER;
+			}
+
+			public void deactivate() {
+				if(shockerAbility != null) {
+					shockerAbility.deactivate();
+				}
 			}
 			
 			@Override
@@ -1098,12 +1217,16 @@ public class Tengu extends Mob {
 			@Override
 			protected void onThrow(int cell) {
 				super.onThrow(cell);
+
 				if (throwingChar != null){
-					Buff.append(throwingChar, ShockerAbility.class).shockerPos = cell;
+					shockerAbility = Buff.append(throwingChar, ShockerAbility.class);
 					throwingChar = null;
 				} else {
-					Buff.append(curUser, ShockerAbility.class).shockerPos = cell;
+					shockerAbility = Buff.append(curUser, ShockerAbility.class);
 				}
+
+				shockerAbility.shockerPos = cell;
+				shockerAbility.assignedShocker = this;
 			}
 			
 			@Override

@@ -23,12 +23,18 @@ package com.shatteredpixel.shatteredpixeldungeon.items.stones;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Tengu;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.ShadowCaster;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.utils.BArray;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Point;
 import com.watabou.utils.Random;
@@ -36,10 +42,11 @@ import com.watabou.utils.Random;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 
 public class StoneOfDisarming extends Runestone {
 	
-	private static final int DIST = 8;
+	private static final int DIST = 3;
 	
 	{
 		image = ItemSpriteSheet.STONE_DISARM;
@@ -61,20 +68,40 @@ public class StoneOfDisarming extends Runestone {
 		int eY = Math.min(Dungeon.level.height()-1, c.y + DIST);
 		
 		ArrayList<Trap> disarmCandidates = new ArrayList<>();
-		
+
+		ArrayList<Tengu.BombAbility.BombItem> tenguBombs = new ArrayList<>();
+		ArrayList<Tengu.ShockerAbility.ShockerItem> tenguShockers = new ArrayList<>();
+		ArrayList<Tengu.FireAbility> tenguFire = Tengu.FireAbility.instances;
+
 		for (int y = sY; y <= eY; y++){
-			int curr = y*Dungeon.level.width() + sX;
 			for ( int x = sX; x <= eX; x++){
+				int curr = y*Dungeon.level.width() + x;
 				
 				if (FOV[curr]){
-					
+
+					Heap h = Dungeon.level.heaps.get(curr);
+					if(h != null) {
+						for (int i = 0; i < h.size(); i++) {
+							Item item = h.get(i);
+
+							if(item instanceof Tengu.BombAbility.BombItem) {
+								tenguBombs.add((Tengu.BombAbility.BombItem) item);
+							}
+							else if(item instanceof Tengu.ShockerAbility.ShockerItem) {
+								tenguShockers.add((Tengu.ShockerAbility.ShockerItem) item);
+							}
+							else {
+								break;
+							}
+						}
+					}
+
 					Trap t = Dungeon.level.traps.get(curr);
 					if (t != null && t.active){
 						disarmCandidates.add(t);
 					}
 					
 				}
-				curr++;
 			}
 		}
 		
@@ -93,10 +120,41 @@ public class StoneOfDisarming extends Runestone {
 		});
 		
 		//disarms at most nine traps
-		while (disarmCandidates.size() > 9){
-			disarmCandidates.remove(9);
+		int maxTraps = 9;
+
+		//Tengu bombs
+		for(Tengu.BombAbility.BombItem b : tenguBombs) {
+			b.deactivate(false);
+			maxTraps--;
 		}
-		
+		//Tengu shockers
+		for(Tengu.ShockerAbility.ShockerItem s : tenguShockers) {
+			s.deactivate();
+			maxTraps--;
+		}
+
+		//Tengu fire
+		ArrayList<Tengu.FireAbility> toRemove = new ArrayList<>();
+		for(Tengu.FireAbility fire : Tengu.FireAbility.instances) {
+
+			if(fire.clearCells(FOV)) {
+				toRemove.add(fire);
+			}
+
+			maxTraps--;
+		}
+
+		for (Tengu.FireAbility fire : toRemove) {
+			Tengu.FireAbility.instances.remove(fire);
+		}
+
+
+		//Traps
+		if(maxTraps < 0) maxTraps = 0;
+		while(disarmCandidates.size() > maxTraps) {
+			disarmCandidates.remove(maxTraps);
+		}
+
 		for ( Trap t : disarmCandidates){
 			t.reveal();
 			t.disarm();
