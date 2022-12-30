@@ -489,9 +489,16 @@ public class Hero extends Char {
 
 	@Override
 	public void onShootInitiate(Char enemy) {
-		PointF movement = PointF.diff(Dungeon.level.getPointF(enemy.pos), Dungeon.level.getPointF(pos));
-		movement.normalizeToOne();
-		Camera.main.panFollowHero(this.sprite, 20f, movement);
+		if(Camera.main.cameraMode == Camera.PREDICT_FOLLOW) {
+			PointF movement = PointF.diff(Dungeon.level.getPointF(enemy.pos), Dungeon.level.getPointF(pos));
+			movement.scale(0.5f);
+			movement.scale(Camera.TILE);
+
+			PointF panLocation = this.sprite.point();
+			panLocation.offset(movement);
+
+			Camera.main.panTo(panLocation, 5f*Camera.main.intensityMultiplier());
+		}
 	}
 
 	public boolean shoot( Char enemy, MissileWeapon wep ) {
@@ -2022,9 +2029,11 @@ public class Hero extends Char {
 
 	@Override
 	public void onAttackInitiate(Char enemy) {
-		PointF panDirection = PointF.diff(Dungeon.level.getPointF(enemy.pos), Dungeon.level.getPointF(pos));
-		panDirection.normalizeToOne();
-		Camera.main.panFollowHero(this.sprite, 20f, panDirection);
+		if(Camera.main.cameraMode == Camera.PREDICT_FOLLOW) {
+			PointF panDirection = PointF.diff(Dungeon.level.getPointF(enemy.pos), Dungeon.level.getPointF(pos));
+			panDirection.normalizeToOne();
+			Camera.main.panFollowHero(this.sprite, 20f, panDirection);
+		}
 	}
 
 	@Override

@@ -62,7 +62,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 public class Bomb extends Item {
-	
+
+
+
 	{
 		image = ItemSpriteSheet.BOMB;
 
@@ -74,8 +76,7 @@ public class Bomb extends Item {
 
 	public Fuse fuse;
 
-	//FIXME using a static variable for this is kinda gross, should be a better way
-	private static boolean lightingFuse = false;
+	private boolean lightingFuse = false;
 
 	private static final String AC_LIGHTTHROW = "LIGHTTHROW";
 
@@ -246,11 +247,13 @@ public class Bomb extends Item {
 	}
 
 	private static final String FUSE = "fuse";
+	private static final String LIGHTING_FUSE = "lighting_fuse";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put( FUSE, fuse );
+		bundle.put( LIGHTING_FUSE, lightingFuse );
 	}
 
 	@Override
@@ -258,6 +261,8 @@ public class Bomb extends Item {
 		super.restoreFromBundle(bundle);
 		if (bundle.contains( FUSE ))
 			Actor.add( fuse = ((Fuse)bundle.get(FUSE)).ignite(this) );
+		if (bundle.contains( LIGHTING_FUSE ))
+			lightingFuse = bundle.getBoolean(LIGHTING_FUSE);
 	}
 
 	//used to track the death from friendly magic badge

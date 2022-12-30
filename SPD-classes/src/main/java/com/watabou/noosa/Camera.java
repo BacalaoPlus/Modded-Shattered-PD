@@ -52,9 +52,11 @@ public class Camera extends Gizmo {
 	}
 
 	private void resetFollow() {
-		shift = new PointF();
-		lastMove = new PointF();
+		shift = PointF.zero;
+		lastMove = PointF.zero;
 		followTarget = null;
+
+		isFollowingHero = false;
 	}
 
 	protected static float invW2;
@@ -246,20 +248,24 @@ public class Camera extends Gizmo {
 			panTarget.offset(shift);
 
 		} else if(cameraMode == SEMI_LOCKED) {
-			panTarget = scrollToCenter(scroll);
-			panTarget.offset(shift);
-
+			//do nothing
 		} else if(cameraMode == LOCKED) {
 			//do nothing
 		}
 	}
 
+	private boolean isFollowingHero = false;
+
 	@Override
 	public void update() {
 		super.update();
 
-		if (followTarget != null) {
+		if (isFollowingHero) {
 			calculateFollowTarget();
+		} else {
+			if(followTarget != null) {
+				panTarget = followTarget.center().offset(centerOffset);
+			}
 		}
 
 		PointF panMove = new PointF();
@@ -271,7 +277,7 @@ public class Camera extends Gizmo {
 			scroll.offset(panMove);
 		}
 
-		if(cameraMode == SEMI_LOCKED && followTarget != null) {
+		if(cameraMode == SEMI_LOCKED && isFollowingHero) {
 			shift.subtract(panMove);
 		}
 		
@@ -351,6 +357,9 @@ public class Camera extends Gizmo {
 
 	public void panFollowHero(Visual target, float intensity, PointF panDirection, boolean movement ){
 
+		isFollowingHero = true;
+		lastMove = panDirection;
+
 		followTarget = target;
 		panIntensity = intensity * intensityMultiplier;
 
@@ -359,13 +368,13 @@ public class Camera extends Gizmo {
 		}
 		else if(cameraMode == PREDICT_FOLLOW) {
 			panIntensity /= 4f;
-
-			lastMove = panDirection;
 		}
 		else if(cameraMode == SEMI_LOCKED) {
 			if(movement) {
-				lastMove = panDirection;
+				panTarget = scrollToCenter(scroll);
 				shift.offset(lastMove.scale(Camera.TILE));
+
+				panTarget.offset(shift);
 			}
 		}
 		else if (cameraMode == LOCKED) {
@@ -384,6 +393,10 @@ public class Camera extends Gizmo {
 
 	public void setFollowDeadzone( float deadzone ){
 		followDeadzone = deadzone;
+	}
+
+	public float intensityMultiplier() {
+		return intensityMultiplier;
 	}
 
 	public void setIntensityMultiplier(float intensityMultiplier) {
