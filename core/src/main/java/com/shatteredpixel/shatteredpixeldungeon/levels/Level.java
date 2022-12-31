@@ -134,7 +134,7 @@ public abstract class Level implements Bundlable {
 	
 	public boolean[] passable;
 	public boolean[] losBlocking;
-	public boolean[] flamable;
+	public boolean[] flammable;
 	public boolean[] secret;
 	public boolean[] solid;
 	public boolean[] avoid;
@@ -298,7 +298,7 @@ public abstract class Level implements Bundlable {
 		
 		passable	= new boolean[length];
 		losBlocking	= new boolean[length];
-		flamable	= new boolean[length];
+		flammable = new boolean[length];
 		secret		= new boolean[length];
 		solid		= new boolean[length];
 		avoid		= new boolean[length];
@@ -347,7 +347,7 @@ public abstract class Level implements Bundlable {
 		map		= bundle.getIntArray( MAP );
 
 		visited	= bundle.getBooleanArray( VISITED );
-		visited	= bundle.getBooleanArray( EXT_VISITED );
+		extVisited	= bundle.getBooleanArray( EXT_VISITED );
 		mapped	= bundle.getBooleanArray( MAPPED );
 
 		transitions = new ArrayList<>();
@@ -772,7 +772,7 @@ public abstract class Level implements Bundlable {
 			int flags = Terrain.flags[map[i]];
 			passable[i]		= (flags & Terrain.PASSABLE) != 0;
 			losBlocking[i]	= (flags & Terrain.LOS_BLOCKING) != 0;
-			flamable[i]		= (flags & Terrain.FLAMABLE) != 0;
+			flammable[i]		= (flags & Terrain.FLAMABLE) != 0;
 			secret[i]		= (flags & Terrain.SECRET) != 0;
 			solid[i]		= (flags & Terrain.SOLID) != 0;
 			avoid[i]		= (flags & Terrain.AVOID) != 0;
@@ -866,7 +866,7 @@ public abstract class Level implements Bundlable {
 		int flags = Terrain.flags[terrain];
 		level.passable[cell]		= (flags & Terrain.PASSABLE) != 0;
 		level.losBlocking[cell]	    = (flags & Terrain.LOS_BLOCKING) != 0;
-		level.flamable[cell]		= (flags & Terrain.FLAMABLE) != 0;
+		level.flammable[cell]		= (flags & Terrain.FLAMABLE) != 0;
 		level.secret[cell]		    = (flags & Terrain.SECRET) != 0;
 		level.solid[cell]			= (flags & Terrain.SOLID) != 0;
 		level.avoid[cell]			= (flags & Terrain.AVOID) != 0;

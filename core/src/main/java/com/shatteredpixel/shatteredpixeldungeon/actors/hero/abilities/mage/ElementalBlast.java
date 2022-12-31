@@ -50,7 +50,6 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
-import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
@@ -208,7 +207,7 @@ public class ElementalBlast extends ArmorAbility {
 								if (freeze != null){
 									freeze.clear(cell);
 								}
-								if (Dungeon.level.flamable[cell]){
+								if (Dungeon.level.flammable[cell]){
 									GameScene.add( Blob.seed( cell, 4, Fire.class ) );
 								}
 

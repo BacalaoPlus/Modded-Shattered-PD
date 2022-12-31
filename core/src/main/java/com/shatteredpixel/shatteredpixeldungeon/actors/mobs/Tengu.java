@@ -950,7 +950,7 @@ public class Tengu extends Mob {
 								Statistics.bossScores[1] -= 100;
 							}
 							
-							if (Dungeon.level.flamable[cell]){
+							if (Dungeon.level.flammable[cell]){
 								Dungeon.level.destroy( cell );
 								
 								observe = true;
