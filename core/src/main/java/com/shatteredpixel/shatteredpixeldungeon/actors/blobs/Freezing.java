@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.blobs;
 
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
@@ -33,6 +34,9 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SnowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.MagicalFireRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.plants.Icecap;
+import com.shatteredpixel.shatteredpixeldungeon.plants.Plant;
+import com.watabou.noosa.audio.Sample;
 
 public class Freezing extends Blob {
 	
@@ -87,6 +91,12 @@ public class Freezing extends Blob {
 		
 		Heap heap = Dungeon.level.heaps.get( cell );
 		if (heap != null) heap.freeze();
+
+		Plant plant = Dungeon.level.plants.get( cell );
+		if(plant != null && !(plant instanceof Icecap)) {
+			plant.wither();
+			Sample.INSTANCE.play(Assets.Sounds.SHATTER);
+		}
 	}
 	
 	@Override
@@ -125,6 +135,12 @@ public class Freezing extends Blob {
 		Heap heap = Dungeon.level.heaps.get( cell );
 		if (heap != null) {
 			heap.freeze();
+		}
+
+		Plant plant = Dungeon.level.plants.get( cell );
+		if(plant != null && !(plant instanceof Icecap)) {
+			plant.wither();
+			Sample.INSTANCE.play(Assets.Sounds.SHATTER);
 		}
 		
 		if (Dungeon.level.heroFOV[cell]) {

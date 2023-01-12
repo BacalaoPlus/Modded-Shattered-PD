@@ -237,6 +237,13 @@ public class Item implements Bundlable {
 		return true;
 
 	}
+
+	public static <T extends Item> boolean collect(Class<T> type, int quantity) {
+		T item = Reflection.newInstance(type);
+		item.quantity = quantity;
+
+		return item.collect();
+	}
 	
 	public boolean collect() {
 		return collect( Dungeon.hero.belongings.backpack );

@@ -69,6 +69,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornShortswor
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingKnife;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingStone;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.plants.Firebloom;
+import com.shatteredpixel.shatteredpixeldungeon.plants.Icecap;
 import com.watabou.utils.DeviceCompat;
 
 public enum HeroClass {
@@ -101,13 +103,14 @@ public enum HeroClass {
 		Waterskin waterskin = new Waterskin();
 		waterskin.collect();
 
-		StoneOfDisarming stone = new StoneOfDisarming();
-		stone.quantity(99);
-		stone.collect();
+		if(Dungeon.DEBUG_MODE) {
+			Item.collect(StoneOfDisarming.class, 99);
 
-		Bomb bomb = new Bomb();
-		bomb.quantity(99);
-		bomb.collect();
+			Item.collect(Bomb.class, 99);
+
+			Item.collect(Firebloom.Seed.class, 99);
+			Item.collect(Icecap.Seed.class, 99);
+		}
 
 		new ScrollOfIdentify().identify();
 
