@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
@@ -32,11 +33,14 @@ import java.text.DecimalFormat;
 import java.util.HashSet;
 
 public class Buff extends Actor {
-	
+
 	public Char target;
 
 	{
 		actPriority = BUFF_PRIO; //low priority, towards the end of a turn
+
+		dmgProps.addProperty(DamageType.Properties.IGN_SHIELD);
+		dmgProps.addProperty(DamageType.Properties.INDIRECT);
 	}
 
 	//determines how the buff is announced when it is shown.

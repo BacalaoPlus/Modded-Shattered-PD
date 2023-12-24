@@ -103,13 +103,11 @@ public enum HeroClass {
 		Waterskin waterskin = new Waterskin();
 		waterskin.collect();
 
+
 		if(Dungeon.DEBUG_MODE) {
-			Item.collect(StoneOfDisarming.class, 99);
-
-			Item.collect(Bomb.class, 99);
-
-			Item.collect(Firebloom.Seed.class, 99);
-			Item.collect(Icecap.Seed.class, 99);
+			for (Class<? extends Item> item : Dungeon.DEBUG.STARTING_ITEMS) {
+				Item.collect(item, 99);
+			}
 		}
 
 		new ScrollOfIdentify().identify();

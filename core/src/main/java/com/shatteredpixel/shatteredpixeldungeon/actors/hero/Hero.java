@@ -174,8 +174,8 @@ public class Hero extends Char {
 
 	public static final int MAX_LEVEL = 30;
 
-	public static final int STARTING_STR = (Dungeon.DEBUG_MODE ? 1000 : 10);
-	public static final int STARTING_HT = (Dungeon.DEBUG_MODE ? 20000 : 20);
+	public static final int STARTING_STR = (!Dungeon.DEBUG_MODE ? 10 : Dungeon.DEBUG.STARTING_STR);
+	public static final int STARTING_HT = (!Dungeon.DEBUG_MODE ? 20 : Dungeon.DEBUG.STARTING_HT);
 	
 	private static final float TIME_TO_REST		    = 1f;
 	private static final float TIME_TO_SEARCH	    = 2f;
@@ -191,8 +191,8 @@ public class Hero extends Char {
 	public ArrayList<LinkedHashMap<Talent, Integer>> talents = new ArrayList<>();
 	public LinkedHashMap<Talent, Talent> metamorphedTalents = new LinkedHashMap<>();
 	
-	private int attackSkill = (Dungeon.DEBUG_MODE ? INFINITE_ACCURACY : 10);
-	private int defenseSkill = (Dungeon.DEBUG_MODE ? 5 : 5);
+	private int attackSkill = (!Dungeon.DEBUG_MODE ? 10 : Dungeon.DEBUG.STARTING_ACCURACY);
+	private int defenseSkill = (!Dungeon.DEBUG_MODE ? 5 : Dungeon.DEBUG.STARTING_EVASION);
 
 	public boolean ready = false;
 	private boolean damageInterrupt = true;
@@ -805,7 +805,11 @@ public class Hero extends Char {
 		if(hasTalent(Talent.BARKSKIN) && Dungeon.level.map[pos] == Terrain.FURROWED_GRASS){
 			Buff.affect(this, Barkskin.class).set( (lvl*pointsInTalent(Talent.BARKSKIN))/2, 1 );
 		}
-		
+
+		if(Dungeon.level.water[pos] && !flying) {
+			Buff.detach(this, Burning.class);
+		}
+
 		return actResult;
 	}
 	

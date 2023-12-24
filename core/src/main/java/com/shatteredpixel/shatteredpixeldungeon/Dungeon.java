@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.huntress.SpiritHawk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Tengu;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Blacksmith;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Imp;
@@ -43,7 +44,14 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesight;
+import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfFrost;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfLiquidFlame;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.BlizzardBrew;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.InfernalBrew;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfDragonsBreath;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfSnapFreeze;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfRegrowth;
@@ -67,6 +75,8 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.SecretRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.plants.Firebloom;
+import com.shatteredpixel.shatteredpixeldungeon.plants.Icecap;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Toolbar;
@@ -94,6 +104,33 @@ public class Dungeon {
 
 	//DEBUG MODE, used for testing, should always be set to false on official releases.
 	public static final boolean DEBUG_MODE = true;
+
+	public static class DEBUG {
+		public static final int STARTING_DEPTH = 1;
+
+		public static final int STARTING_STR = 10000; // default is 10
+		public static final int STARTING_HT = 10000; // default is 20
+		public static final int STARTING_EVASION = 5; // default is 5
+		public static final int STARTING_ACCURACY = Char.INFINITE_ACCURACY; // default is 10
+
+		public static final ArrayList<Class<? extends Item>> STARTING_ITEMS = new ArrayList<>();
+
+		static {
+			STARTING_ITEMS.add(Firebloom.Seed.class);
+			STARTING_ITEMS.add(Icecap.Seed.class);
+
+			STARTING_ITEMS.add(PotionOfFrost.class);
+			STARTING_ITEMS.add(PotionOfSnapFreeze.class);
+
+			STARTING_ITEMS.add(PotionOfLiquidFlame.class);
+			STARTING_ITEMS.add(PotionOfDragonsBreath.class);
+
+			STARTING_ITEMS.add(BlizzardBrew.class);
+			STARTING_ITEMS.add(InfernalBrew.class);
+
+			STARTING_ITEMS.add(Bomb.class);
+		}
+	}
 
 	//enum of items which have limited spawns, records how many have spawned
 	//could all be their own separate numbers, but this allows iterating, much nicer for bundling/initializing.
@@ -246,7 +283,7 @@ public class Dungeon {
 		QuickSlotButton.reset();
 		Toolbar.swappedQuickslots = false;
 		
-		depth = (DEBUG_MODE ? 1 : 1);
+		depth = (DEBUG_MODE ? DEBUG.STARTING_DEPTH : 1);
 		branch = 0;
 
 		gold = 0;

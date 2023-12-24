@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.DamageType;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.SparseArray;
@@ -33,7 +34,9 @@ import com.watabou.utils.SparseArray;
 import java.util.HashSet;
 
 public abstract class Actor implements Bundlable {
-	
+
+	public DamageType dmgProps = new DamageType(this);
+
 	public static final float TICK	= 1f;
 
 	private float time;
