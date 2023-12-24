@@ -43,7 +43,7 @@ public class Golem extends Mob {
 		spriteClass = GolemSprite.class;
 		
 		HP = HT = 120;
-		defenseSkill = 15;
+		evasion = 15;
 		
 		EXP = 12;
 		maxLvl = 22;

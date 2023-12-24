@@ -562,7 +562,7 @@ public class DriedRose extends Artifact {
 			}
 			
 			//same dodge as the hero
-			defenseSkill = (Dungeon.hero.lvl+4);
+			evasion = (Dungeon.hero.lvl+4);
 			if (rose == null) return;
 			HT = 20 + 8*rose.level();
 		}
@@ -675,8 +675,8 @@ public class DriedRose extends Artifact {
 		}
 		
 		@Override
-		public int defenseSkill(Char enemy) {
-			int defense = super.defenseSkill(enemy);
+		public int Evasion(Char enemy) {
+			int defense = super.Evasion(enemy);
 
 			if (defense != 0 && rose != null && rose.armor != null ){
 				defense = Math.round(rose.armor.evasionFactor( this, defense ));

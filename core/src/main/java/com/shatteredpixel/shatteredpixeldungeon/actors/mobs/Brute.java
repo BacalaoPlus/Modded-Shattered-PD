@@ -31,7 +31,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.BruteSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
@@ -42,7 +41,7 @@ public class Brute extends Mob {
 		spriteClass = BruteSprite.class;
 		
 		HP = HT = 40;
-		defenseSkill = 15;
+		evasion = 15;
 		
 		EXP = 8;
 		maxLvl = 16;

@@ -124,6 +124,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.LevelTransition;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.Trap;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.ShadowCaster;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
@@ -545,7 +546,7 @@ public class Hero extends Char {
 	}
 	
 	@Override
-	public int defenseSkill( Char enemy ) {
+	public int Evasion(Char enemy ) {
 
 		if (buff(Combo.ParryTracker.class) != null){
 			if (canAttack(enemy)){
@@ -1326,9 +1327,12 @@ public class Hero extends Char {
 		
 		return super.defenseProc( enemy, damage );
 	}
-	
+
 	@Override
-	public void damage( int dmg, Object src ) {
+	public void damage(int dmg, DamageType type ) {
+
+		Object src = type.src;
+
 		if (buff(TimekeepersHourglass.timeStasis.class) != null)
 			return;
 
@@ -1368,7 +1372,7 @@ public class Hero extends Char {
 
 		//TODO improve this when I have proper damage source logic
 		if (belongings.armor() != null && belongings.armor().hasGlyph(AntiMagic.class, this)
-				&& AntiMagic.RESISTS.contains(src.getClass())){
+				&& type.contains(DamageType.Properties.MAGIC)){
 			dmg -= AntiMagic.drRoll(this, belongings.armor().buffedLvl());
 		}
 
@@ -1378,7 +1382,7 @@ public class Hero extends Char {
 		}
 
 		int preHP = HP + shielding();
-		super.damage( dmg, src );
+		super.damage( dmg, type );
 		int postHP = HP + shielding();
 		int effectiveDamage = preHP - postHP;
 

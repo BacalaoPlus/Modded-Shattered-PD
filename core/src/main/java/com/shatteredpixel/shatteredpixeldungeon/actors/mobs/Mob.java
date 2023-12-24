@@ -53,7 +53,6 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Surprise;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Wound;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
-import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.MasterThievesArmband;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
@@ -107,7 +106,7 @@ public abstract class Mob extends Char {
 	
 	protected int target = -1;
 	
-	public int defenseSkill = 0;
+	public int evasion = 0;
 	
 	public int EXP = 1;
 	public int maxLvl = Hero.MAX_LEVEL-1;
@@ -592,11 +591,11 @@ public abstract class Mob extends Char {
 	}
 	
 	@Override
-	public int defenseSkill( Char enemy ) {
+	public int Evasion(Char enemy ) {
 		if ( !surprisedBy(enemy)
 				&& paralysed == 0
 				&& !(alignment == Alignment.ALLY && enemy == Dungeon.hero)) {
-			return this.defenseSkill;
+			return this.evasion;
 		} else {
 			return 0;
 		}

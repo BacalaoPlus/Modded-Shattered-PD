@@ -47,7 +47,6 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.GameMath;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 
@@ -62,7 +61,7 @@ public class Goo extends Mob {
 		baseSpeed = growingFactor;
 
 		EXP = 10;
-		defenseSkill = 8;
+		evasion = 8;
 		spriteClass = GooSprite.class;
 
 		properties.add(Property.BOSS);
@@ -98,8 +97,8 @@ public class Goo extends Mob {
 	}
 
 	@Override
-	public int defenseSkill(Char enemy) {
-		return (int)(super.defenseSkill(enemy) * ((HP*2 <= HT)? 1.5 : 1));
+	public int Evasion(Char enemy) {
+		return (int)(super.Evasion(enemy) * ((HP*2 <= HT)? 1.5 : 1));
 	}
 
 	@Override

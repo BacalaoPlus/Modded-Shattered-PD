@@ -40,7 +40,7 @@ public class GreatCrab extends Crab {
 		spriteClass = GreatCrabSprite.class;
 
 		HP = HT = 25;
-		defenseSkill = 0; //see damage()
+		evasion = 0; //see damage()
 		baseSpeed = 1f;
 
 		EXP = 6;
@@ -87,7 +87,7 @@ public class GreatCrab extends Crab {
 	}
 
 	@Override
-	public int defenseSkill( Char enemy ) {
+	public int Evasion(Char enemy ) {
 		//crab blocks all melee attacks from its current target
 		if (enemySeen
 				&& state != SLEEPING
@@ -100,7 +100,7 @@ public class GreatCrab extends Crab {
 			}
 			return INFINITE_EVASION;
 		}
-		return super.defenseSkill( enemy );
+		return super.Evasion( enemy );
 	}
 
 	@Override

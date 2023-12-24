@@ -29,7 +29,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corruption;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
@@ -324,13 +323,13 @@ public class WandOfLivingEarth extends DamageWand {
 			}
 			HP = Math.min(HT, HP + healthToAdd);
 			//half of hero's evasion
-			defenseSkill = (hero.lvl + 4)/2;
+			evasion = (hero.lvl + 4)/2;
 		}
 
 		@Override
 		public int attackSkill(Char target) {
 			//same as the hero
-			return 2*defenseSkill + 5;
+			return 2* evasion + 5;
 		}
 
 		@Override
@@ -373,14 +372,14 @@ public class WandOfLivingEarth extends DamageWand {
 		@Override
 		public void storeInBundle(Bundle bundle) {
 			super.storeInBundle(bundle);
-			bundle.put(DEFENSE, defenseSkill);
+			bundle.put(DEFENSE, evasion);
 			bundle.put(WAND_LEVEL, wandLevel);
 		}
 
 		@Override
 		public void restoreFromBundle(Bundle bundle) {
 			super.restoreFromBundle(bundle);
-			defenseSkill = bundle.getInt(DEFENSE);
+			evasion = bundle.getInt(DEFENSE);
 			wandLevel = bundle.getInt(WAND_LEVEL);
 		}
 

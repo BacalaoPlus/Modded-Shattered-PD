@@ -29,7 +29,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.ToxicGas;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corruption;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PrismaticGuard;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
@@ -50,7 +49,7 @@ public class PrismaticImage extends NPC {
 		spriteClass = PrismaticSprite.class;
 		
 		HP = HT = 10;
-		defenseSkill = 1;
+		evasion = 1;
 		
 		alignment = Alignment.ALLY;
 		intelligentAlly = true;
@@ -162,13 +161,13 @@ public class PrismaticImage extends NPC {
 	}
 	
 	@Override
-	public int defenseSkill(Char enemy) {
+	public int Evasion(Char enemy) {
 		if (hero != null) {
 			int baseEvasion = 4 + hero.lvl;
-			int heroEvasion = hero.defenseSkill(enemy);
+			int heroEvasion = hero.Evasion(enemy);
 			
 			//if the hero has more/less evasion, 50% of it is applied
-			return super.defenseSkill(enemy) * (baseEvasion + heroEvasion) / 2;
+			return super.Evasion(enemy) * (baseEvasion + heroEvasion) / 2;
 		} else {
 			return 0;
 		}

@@ -60,7 +60,7 @@ public abstract class YogFist extends Mob {
 
 	{
 		HP = HT = 300;
-		defenseSkill = 20;
+		evasion = 20;
 
 		viewDistance = Light.DISTANCE;
 

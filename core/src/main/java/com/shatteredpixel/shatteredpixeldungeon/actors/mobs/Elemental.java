@@ -54,7 +54,7 @@ public abstract class Elemental extends Mob {
 
 	{
 		HP = HT = 60;
-		defenseSkill = 20;
+		evasion = 20;
 		
 		EXP = 10;
 		maxLvl = 20;
@@ -88,7 +88,7 @@ public abstract class Elemental extends Mob {
 		summonedALly = true;
 		//sewers are prison are equivalent, otherwise scales as normal (2/2/3/4/5)
 		int regionScale = Math.max(2, (1 + Dungeon.scalingDepth()/5));
-		defenseSkill = 5*regionScale;
+		evasion = 5*regionScale;
 		HT = 15*regionScale;
 	}
 	
@@ -239,7 +239,7 @@ public abstract class Elemental extends Mob {
 			HT = 60;
 			HP = HT/2; //30
 			
-			defenseSkill = 12;
+			evasion = 12;
 			
 			EXP = 7;
 			

@@ -83,7 +83,7 @@ public class DM300 extends Mob {
 
 		HP = HT = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 400 : 300;
 		EXP = 30;
-		defenseSkill = 15;
+		evasion = 15;
 
 		properties.add(Property.BOSS);
 		properties.add(Property.INORGANIC);

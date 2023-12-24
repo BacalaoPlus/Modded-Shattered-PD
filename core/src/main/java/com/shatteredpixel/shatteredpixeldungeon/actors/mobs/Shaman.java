@@ -45,7 +45,7 @@ public abstract class Shaman extends Mob {
 	
 	{
 		HP = HT = 35;
-		defenseSkill = 15;
+		evasion = 15;
 		
 		EXP = 8;
 		maxLvl = 16;

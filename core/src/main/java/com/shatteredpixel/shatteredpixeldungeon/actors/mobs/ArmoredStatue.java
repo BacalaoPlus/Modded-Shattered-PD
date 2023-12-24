@@ -127,8 +127,8 @@ public class ArmoredStatue extends Statue {
 	}
 
 	@Override
-	public int defenseSkill(Char enemy) {
-		return Math.round(armor.evasionFactor(this, super.defenseSkill(enemy)));
+	public int Evasion(Char enemy) {
+		return Math.round(armor.evasionFactor(this, super.Evasion(enemy)));
 	}
 
 	@Override

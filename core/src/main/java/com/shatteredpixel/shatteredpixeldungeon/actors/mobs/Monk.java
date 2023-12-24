@@ -40,7 +40,7 @@ public class Monk extends Mob {
 		spriteClass = MonkSprite.class;
 		
 		HP = HT = 70;
-		defenseSkill = 30;
+		evasion = 30;
 		
 		EXP = 11;
 		maxLvl = 21;
@@ -104,11 +104,11 @@ public class Monk extends Mob {
 	}
 	
 	@Override
-	public int defenseSkill( Char enemy ) {
+	public int Evasion(Char enemy ) {
 		if (buff(Focus.class) != null && paralysed == 0 && state != SLEEPING){
 			return INFINITE_EVASION;
 		}
-		return super.defenseSkill( enemy );
+		return super.Evasion( enemy );
 	}
 	
 	@Override

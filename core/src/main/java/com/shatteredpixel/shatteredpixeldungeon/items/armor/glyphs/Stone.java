@@ -35,7 +35,7 @@ public class Stone extends Armor.Glyph {
 	public int proc(Armor armor, Char attacker, Char defender, int damage) {
 		
 		testing = true;
-		float evasion = defender.defenseSkill(attacker);
+		float evasion = defender.Evasion(attacker);
 		float accuracy = attacker.attackSkill(defender);
 		testing = false;
 

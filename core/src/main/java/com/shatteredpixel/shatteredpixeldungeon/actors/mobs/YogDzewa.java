@@ -616,7 +616,7 @@ public class YogDzewa extends Mob {
 			spriteClass = LarvaSprite.class;
 
 			HP = HT = 20;
-			defenseSkill = 12;
+			evasion = 12;
 			viewDistance = Light.DISTANCE;
 
 			EXP = 5;

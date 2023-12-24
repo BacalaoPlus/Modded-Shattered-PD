@@ -8,13 +8,14 @@ public class DamageType {
 
     public enum Properties {
         IGN_SHIELD,
+        ARMOR_PIERCE,
         INDIRECT,
         MAGIC
     }
 
     public Object src;
 
-    private HashSet<Properties> props = new HashSet<>();
+    private HashSet<Properties> props;
 
 
     public void addProperty(Properties prop) {
@@ -34,6 +35,7 @@ public class DamageType {
 
     public DamageType(Object source) {
         this.src = source;
+        props = new HashSet<>();
     }
     public DamageType(HashSet<Properties> props) {
         this.src = null;

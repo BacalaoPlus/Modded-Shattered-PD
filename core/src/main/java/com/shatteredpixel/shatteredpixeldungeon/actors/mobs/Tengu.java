@@ -88,7 +88,7 @@ public class Tengu extends Mob {
 		
 		HP = HT = Dungeon.isChallenged(Challenges.STRONGER_BOSSES) ? 250 : 200;
 		EXP = 20;
-		defenseSkill = 15;
+		evasion = 15;
 		
 		HUNTING = new Hunting();
 		
