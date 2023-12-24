@@ -26,6 +26,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.Random;
 
 public class Barkskin extends Buff {
 	
@@ -57,6 +58,8 @@ public class Barkskin extends Buff {
 	public int level() {
 		return level;
 	}
+
+	public int range() { return Random.NormalIntRange( 0 , level ); }
 	
 	public void set( int value, int time ) {
 		//decide whether to override, preferring high value + low interval

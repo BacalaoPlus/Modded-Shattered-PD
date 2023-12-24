@@ -36,6 +36,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.keys.SkeletonKey;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.GooBlob;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
@@ -67,6 +68,9 @@ public class Goo extends Mob {
 		properties.add(Property.BOSS);
 		properties.add(Property.DEMONIC);
 		properties.add(Property.ACIDIC);
+
+
+		dmgProps.addProperty(DamageType.Properties.MAGIC);
 	}
 
 	private int pumpedUp = 0;
@@ -249,7 +253,7 @@ public class Goo extends Mob {
 	}
 
 	@Override
-	public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
+	public boolean attack(Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
 		boolean result = super.attack( enemy, dmgMulti, dmgBonus, accMulti );
 		if (pumpedUp > 0) {
 			pumpedUp = 0;

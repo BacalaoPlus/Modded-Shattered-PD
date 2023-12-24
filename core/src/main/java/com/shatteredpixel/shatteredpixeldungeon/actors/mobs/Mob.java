@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
@@ -65,6 +66,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWea
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.DamageType;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.plants.Swiftthistle;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -81,12 +83,16 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 
+import java.util.EnumSet;
 public abstract class Mob extends Char {
 
 	{
 		actPriority = MOB_PRIO;
 		
 		alignment = Alignment.ENEMY;
+
+		dmgProps.addProperty(DamageType.Properties.MELEE);
+		dmgProps.addProperty(DamageType.Properties.PHYSICAL);
 	}
 	
 	private static final String	TXT_DIED	= "You hear something died in the distance";

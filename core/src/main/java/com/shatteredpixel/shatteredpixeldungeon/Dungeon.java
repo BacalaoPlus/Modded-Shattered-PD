@@ -106,7 +106,7 @@ public class Dungeon {
 	public static final boolean DEBUG_MODE = true;
 
 	public static class DEBUG {
-		public static final int STARTING_DEPTH = 1;
+		public static final int STARTING_DEPTH = 5;
 
 		public static final int STARTING_STR = 10000; // default is 10
 		public static final int STARTING_HT = 10000; // default is 20

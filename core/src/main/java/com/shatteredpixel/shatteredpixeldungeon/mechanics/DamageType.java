@@ -7,10 +7,21 @@ import java.util.HashSet;
 public class DamageType {
 
     public enum Properties {
+
+        INDIRECT,           // Doesn't interrupt actions, wake up
+                            // mobs, etc.
+
         IGN_SHIELD,
         ARMOR_PIERCE,
-        INDIRECT,
-        MAGIC
+
+        MAGIC,
+        PHYSICAL,
+
+        FIRE,
+        COLD,
+
+        MELEE,
+        RANGED
     }
 
     public Object src;
@@ -35,7 +46,7 @@ public class DamageType {
 
     public DamageType(Object source) {
         this.src = source;
-        props = new HashSet<>();
+        props = new HashSet<Properties>();
     }
     public DamageType(HashSet<Properties> props) {
         this.src = null;

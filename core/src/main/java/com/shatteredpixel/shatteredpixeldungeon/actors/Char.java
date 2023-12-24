@@ -301,8 +301,9 @@ public abstract class Char extends Actor {
 		}
 	}
 
-	private int effectiveDamage(Char enemy, float dmg, float dmgBonus, float dmgMulti) {
-		dmg = Math.round(dmg*dmgMulti);
+	private float earlyBuffModifiers(float dmg) {
+		Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
+		if (endure != null) dmg = endure.damageFactor(dmg);
 
 		Berserk berserk = buff(Berserk.class);
 		if (berserk != null) dmg = berserk.damageFactor(dmg);
@@ -317,19 +318,10 @@ public abstract class Char extends Actor {
 
 		dmg *= AscensionChallenge.statModifier(this);
 
-		//flat damage bonus is applied after positive multipliers, but before negative ones
-		dmg += dmgBonus;
+		return dmg;
+	}
 
-		//friendly endure
-		Endure.EndureTracker endure = buff(Endure.EndureTracker.class);
-		if (endure != null) dmg = endure.damageFactor(dmg);
-
-		//enemy endure
-		endure = enemy.buff(Endure.EndureTracker.class);
-		if (endure != null){
-			dmg = endure.adjustDamageTaken(dmg);
-		}
-
+	private float lateBuffModifiers(float dmg, Char enemy, DamageType attackProps) {
 		if (enemy.buff(ScrollOfChallenge.ChallengeArena.class) != null){
 			dmg *= 0.67f;
 		}
@@ -338,14 +330,40 @@ public abstract class Char extends Actor {
 			dmg *= 0.67f;
 		}
 
-		return Math.round(dmg);
+		if ( enemy.buff( Vulnerable.class ) != null){
+			dmg *= 1.33f;
+		}
+
+		Endure.EndureTracker endure = enemy.buff(Endure.EndureTracker.class);
+		if (endure != null && !attackProps.contains(DamageType.Properties.ARMOR_PIERCE)) {
+			dmg = endure.adjustDamageTaken(dmg);
+		}
+
+		if (enemy.buff(Viscosity.ViscosityTracker.class) != null && !attackProps.contains(DamageType.Properties.ARMOR_PIERCE)) {
+			dmg = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(dmg);
+			enemy.buff(Viscosity.ViscosityTracker.class).detach();
+		}
+
+		return dmg;
 	}
 
-	final public boolean attack( Char enemy ){
+	final public boolean attack(Char enemy ){
 		return attack(enemy, 1f, 0f, 1f);
 	}
 
-	public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
+	public boolean attack(Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
+
+		DamageType attackProps = dmgProps;
+		attackProps.addProperty(DamageType.Properties.PHYSICAL);
+
+		if (this instanceof Hero) {
+			Hero h = (Hero)this;
+			if (h.belongings.weapon() instanceof MissileWeapon
+					&& h.subClass == HeroSubClass.SNIPER
+					&& !Dungeon.level.adjacent(h.pos, enemy.pos)){
+				attackProps.addProperty(DamageType.Properties.ARMOR_PIERCE);
+			}
+		}
 
 		//
 		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos];
@@ -354,38 +372,7 @@ public abstract class Char extends Actor {
 
 		if (enemy == null) return false;
 
-		if (enemy.isInvulnerable(getClass())) {
-			if (visibleFight) {
-				enemy.sprite.showStatus( CharSprite.POSITIVE, Messages.get(this, "invulnerable") );
-
-				Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1f, Random.Float(0.96f, 1.05f));
-			}
-			return false;
-		}
-
-
-
 		else if (hit( this, enemy, accMulti )) {
-
-			//calculate defense roll
-			int defenseRoll = Math.round(enemy.drRoll() * AscensionChallenge.statModifier(enemy));
-
-			Barkskin bark = enemy.buff(Barkskin.class);
-			if (bark != null)   defenseRoll += Random.NormalIntRange( 0 , bark.level() );
-			
-			if (this instanceof Hero){
-				Hero h = (Hero)this;
-				if (h.belongings.weapon() instanceof MissileWeapon
-						&& h.subClass == HeroSubClass.SNIPER
-						&& !Dungeon.level.adjacent(h.pos, enemy.pos)){
-					defenseRoll = 0;
-				}
-			}
-			//
-
-
-			//we use a float here briefly so that we don't have to constantly round while
-			// potentially applying various multiplier effects
 
 			Preparation prep = buff(Preparation.class);
 			if (prep != null){
@@ -396,37 +383,49 @@ public abstract class Char extends Actor {
 			} else {
 				dmg = damageRoll();
 			}
+			dmg *= dmgMulti;
 
 
-			//apply bonuses and resistances, in order, this accounts for:
+			//early buff modifiers (berserk, fury, champions, etc)
+			dmg = earlyBuffModifiers(dmg);
+			dmg += dmgBonus;
 
-			//dmg multiplier, berserk, fury buff, champion enemy buffs, ascension challenge, dmg bonus
-			//endure, enemy SoC buff, weakness debuff, and rounding
-			int effectiveDamage = effectiveDamage(enemy, dmg, dmgBonus, dmgMulti);
-			
-			effectiveDamage = enemy.defenseProc( this, effectiveDamage );
-			effectiveDamage = Math.max( effectiveDamage - defenseRoll, 0 );
+			int roundDmg = Math.round(dmg);
+
+			//
+			attackProc(enemy, roundDmg);
 			//
 
-			//vulnerable specifically applies after armor reductions
-			if ( enemy.buff( Vulnerable.class ) != null){
-				effectiveDamage *= 1.33f;
+			if (enemy.isInvulnerable(getClass())) {
+				if (visibleFight) {
+					enemy.sprite.showStatus( CharSprite.POSITIVE, Messages.get(this, "invulnerable") );
+
+					Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1f, Random.Float(0.96f, 1.05f));
+				}
+				return false;
 			}
 
-			
-			effectiveDamage = attackProc( enemy, effectiveDamage );
+			if(attackProps.contains(DamageType.Properties.ARMOR_PIERCE)) {
+
+			} else {
+				int defenseRoll = enemy.drTotal();
+
+				roundDmg = enemy.defenseProc( this, roundDmg );
+				roundDmg = Math.max( roundDmg - defenseRoll, 1 );
+			}
+
+
+			dmg = roundDmg;
+			//late buff modifiers (endure, viscosity, etc)
+			dmg = lateBuffModifiers(dmg, enemy, attackProps);
+			roundDmg = Math.round(dmg);
 			
 			if (visibleFight) {
-				if (effectiveDamage > 0 || !enemy.blockSound(Random.Float(0.96f, 1.05f))) {
+				if (roundDmg > 0 || !enemy.blockSound(Random.Float(0.96f, 1.05f))) {
 					hitSound(Random.Float(0.87f, 1.15f));
 				}
 			}
 
-
-			if (enemy.buff(Viscosity.ViscosityTracker.class) != null){
-				effectiveDamage = enemy.buff(Viscosity.ViscosityTracker.class).deferDamage(effectiveDamage);
-				enemy.buff(Viscosity.ViscosityTracker.class).detach();
-			}
 
 			// If the enemy is already dead, interrupt the attack.
 			// This matters as defence procs can sometimes inflict self-damage, such as armor glyphs.
@@ -434,7 +433,7 @@ public abstract class Char extends Actor {
 				return true;
 			}
 
-			enemy.damage( effectiveDamage, dmgProps );
+			enemy.damage( roundDmg, dmgProps );
 
 			if (enemy.isAlive() && enemy.alignment != alignment && prep != null && prep.canKO(enemy)){
 				enemy.HP = 0;
@@ -448,7 +447,7 @@ public abstract class Char extends Actor {
 				enemy.sprite.showStatus(CharSprite.NEGATIVE, Messages.get(Preparation.class, "assassinated"));
 			}
 
-			enemy.sprite.bloodBurstA( sprite.center(), effectiveDamage );
+			enemy.sprite.bloodBurstA( sprite.center(), roundDmg );
 			enemy.sprite.flash();
 
 			if (!enemy.isAlive() && visibleFight) {
@@ -539,6 +538,16 @@ public abstract class Char extends Actor {
 	public int drRoll() {
 		return 0;
 	}
+
+	public int drTotal() {
+		int defense = drRoll();
+		defense = Math.round(defense * AscensionChallenge.statModifier(this));
+
+		Barkskin bark = buff(Barkskin.class);
+		if(bark != null) defense += bark.range();
+
+		return defense;
+	}
 	
 	public int damageRoll() {
 		return 1;
@@ -555,6 +564,7 @@ public abstract class Char extends Actor {
 		for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
 			buff.onAttackProc( enemy );
 		}
+
 		return damage;
 	}
 	
