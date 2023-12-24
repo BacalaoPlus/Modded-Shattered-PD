@@ -818,6 +818,16 @@ public abstract class Level implements Bundlable {
 
 	}
 
+	public boolean burnTile( int pos ) {
+		if(flammable[pos]) {
+			destroy(pos);
+
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	public void destroy( int pos ) {
 		//if raw tile type is flammable or empty
 		int terr = map[pos];
@@ -829,6 +839,8 @@ public abstract class Level implements Bundlable {
 		if (web != null){
 			web.clear(pos);
 		}
+
+		GameScene.updateMap(pos);
 	}
 
 	public void cleanWalls() {

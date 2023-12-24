@@ -25,7 +25,7 @@ import com.watabou.noosa.NinePatch;
 
 public class Chrome {
 
-	public enum  Type {
+	public enum Type {
 		TOAST,
 		TOAST_TR,
 		TOAST_WHITE,

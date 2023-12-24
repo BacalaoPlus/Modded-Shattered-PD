@@ -81,7 +81,7 @@ import java.util.HashSet;
 
 public class Tengu extends Mob {
 
-	private final int DEBUG_ThresholdMult = (Dungeon.DEBUG_MODE ? 100 : 1);
+	private final int DEBUG_MORE_ABILITIES = (Dungeon.DEBUG_MODE ? 100 : 1);
 
 	{
 		spriteClass = TenguSprite.class;
@@ -459,12 +459,12 @@ public class Tengu extends Mob {
 			abilityCooldown--;
 
 			//on Debug Mode throw abilities more slowly
-			if (targetAbilityUses() - abilitiesUsed >= (4 * DEBUG_ThresholdMult) && !Dungeon.isChallenged(Challenges.STRONGER_BOSSES)){
+			if (targetAbilityUses() - abilitiesUsed >= (4 * DEBUG_MORE_ABILITIES) && !Dungeon.isChallenged(Challenges.STRONGER_BOSSES)){
 				//Very behind in ability uses, use one right away!
 				//but not on bosses challenge, we already cast quickly then
 				abilityCooldown = 0;
 
-			} else if (targetAbilityUses() - abilitiesUsed >= (3 * DEBUG_ThresholdMult)){
+			} else if (targetAbilityUses() - abilitiesUsed >= (3 * DEBUG_MORE_ABILITIES)){
 				//moderately behind in uses, use one every other action.
 				if (abilityCooldown == -1 || abilityCooldown > 1) abilityCooldown = 1;
 				
@@ -489,7 +489,7 @@ public class Tengu extends Mob {
 		targetAbilityUses += Math.max(0, arenaJumps-2);
 
 		//on Debug Mode throw abilities for longer
-		return targetAbilityUses * (DEBUG_ThresholdMult);
+		return targetAbilityUses * (DEBUG_MORE_ABILITIES);
 	}
 	
 	public boolean useAbility(){
@@ -949,13 +949,8 @@ public class Tengu extends Mob {
 								Statistics.qualifiedForBossChallengeBadge = false;
 								Statistics.bossScores[1] -= 100;
 							}
-							
-							if (Dungeon.level.flammable[cell]){
-								Dungeon.level.destroy( cell );
-								
-								observe = true;
-								GameScene.updateMap( cell );
-							}
+
+							observe = (Dungeon.level.burnTile(cell) || observe);
 							
 							burned = true;
 							CellEmitter.get(cell).start(FlameParticle.FACTORY, 0.03f, 10);

@@ -166,13 +166,7 @@ public class Eye extends Mob {
 		Invisibility.dispel(this);
 		for (int pos : beam.subPath(1, beam.dist)) {
 
-			if (Dungeon.level.flammable[pos]) {
-
-				Dungeon.level.destroy( pos );
-				GameScene.updateMap( pos );
-				terrainAffected = true;
-
-			}
+			terrainAffected = (Dungeon.level.burnTile(pos) || terrainAffected);
 
 			Char ch = Actor.findChar( pos );
 			if (ch == null) {

@@ -40,19 +40,21 @@ public class InfernalBrew extends Brew {
 	
 	@Override
 	public void shatter(int cell) {
-		
+
+		int blobAmount = 20;
+
 		if (Dungeon.level.heroFOV[cell]) {
 			splash( cell );
 			Sample.INSTANCE.play( Assets.Sounds.SHATTER );
 			Sample.INSTANCE.play( Assets.Sounds.GAS );
 		}
 
-		int centerVolume = 120;
-		for (int i : PathFinder.NEIGHBOURS8){
+		int centerVolume = blobAmount;
+		for (int i : PathFinder.NEIGHBOURS4){
 			if (!Dungeon.level.solid[cell+i]){
-				GameScene.add( Blob.seed( cell+i, 120, Inferno.class ) );
+				GameScene.add( Blob.seed( cell+i, blobAmount, Inferno.class ) );
 			} else {
-				centerVolume += 120;
+				centerVolume += blobAmount;
 			}
 		}
 		

@@ -52,7 +52,7 @@ public class PotionOfSnapFreeze extends ExoticPotion {
 		for (int offset : PathFinder.NEIGHBOURS9){
 			if (!Dungeon.level.solid[cell+offset]) {
 				
-				Freezing.affect( cell + offset );
+				Freezing.affect( cell + offset, true );
 				
 				Char ch = Actor.findChar( cell + offset);
 				if (ch != null){

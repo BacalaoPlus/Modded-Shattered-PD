@@ -153,12 +153,8 @@ public class Bomb extends Item {
 					if (Dungeon.level.heroFOV[c]) {
 						CellEmitter.get(c).burst(SmokeParticle.FACTORY, 4);
 					}
-					
-					if (Dungeon.level.flammable[c]) {
-						Dungeon.level.destroy(c);
-						GameScene.updateMap(c);
-						terrainAffected = true;
-					}
+
+					terrainAffected = (Dungeon.level.burnTile(c) || terrainAffected);
 					
 					//destroys items / triggers bombs caught in the blast.
 					Heap heap = Dungeon.level.heaps.get(c);

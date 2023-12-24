@@ -99,13 +99,7 @@ public class WandOfDisintegration extends DamageWand {
 				terrainPassed++;
 			}
 
-			if (Dungeon.level.flammable[c]) {
-
-				Dungeon.level.destroy( c );
-				GameScene.updateMap( c );
-				terrainAffected = true;
-				
-			}
+			terrainAffected = (Dungeon.level.burnTile(c) || terrainAffected);
 			
 			CellEmitter.center( c ).burst( PurpleParticle.BURST, Random.IntRange( 1, 2 ) );
 		}

@@ -207,9 +207,10 @@ public class Blob extends Actor {
 	}
 	
 	public void clear( int cell ) {
+		cur[cell] = 0;
+		off[cell] = 0;
 		if (volume == 0) return;
 		volume -= cur[cell];
-		cur[cell] = 0;
 	}
 
 	public void fullyClear(){
@@ -226,7 +227,11 @@ public class Blob extends Actor {
 	public String tileDesc() {
 		return null;
 	}
-	
+
+	public void postpone() {
+		postpone(TICK);
+	}
+
 	public static<T extends Blob> T seed( int cell, int amount, Class<T> type ) {
 		return seed(cell, amount, type, Dungeon.level);
 	}

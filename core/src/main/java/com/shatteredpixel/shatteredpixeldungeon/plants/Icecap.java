@@ -49,15 +49,23 @@ public class Icecap extends Plant {
 
 		if (ch instanceof Hero && ((Hero) ch).subClass == HeroSubClass.WARDEN){
 			Buff.affect(ch, FrostImbue.class, FrostImbue.DURATION*0.3f);
+
 		}
-		
+
+		Freezing.affect(pos, true);
+		for (int offset : PathFinder.NEIGHBOURS8) {
+			Freezing.affect(pos + offset, false);
+		}
+
+		/*
 		PathFinder.buildDistanceMap( pos, BArray.not( Dungeon.level.losBlocking, null ), 1 );
 
 		for (int i=0; i < PathFinder.distance.length; i++) {
 			if (PathFinder.distance[i] < Integer.MAX_VALUE) {
-				Freezing.affect( i );
+				Freezing.affect( i, true );
 			}
 		}
+		 */
 	}
 	
 	public static class Seed extends Plant.Seed {

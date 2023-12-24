@@ -48,7 +48,7 @@ public class AntiEntropy extends Glyph {
 		if ( Random.Float() < procChance ) {
 
 			for (int i : PathFinder.NEIGHBOURS8){
-				Freezing.affect(defender.pos+i);
+				Freezing.affect(defender.pos+i, true);
 			}
 
 			if (!Dungeon.level.water[defender.pos]) {

@@ -26,7 +26,9 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Chill;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Frost;
 import com.shatteredpixel.shatteredpixeldungeon.effects.BlobEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
@@ -111,14 +113,29 @@ public class Freezing extends Blob {
 	}
 	
 	//legacy functionality from before this was a proper blob. Returns true if this cell is visible
-	public static boolean affect( int cell ) {
-		
+	public static boolean affect( int cell, boolean strong ) {
+
+		boolean emitParticle = false;
+
+		Class<? extends FlavourBuff> effect = (strong ? Frost.class : Chill.class);
+		float effectDuration = (strong ? Frost.DURATION : Chill.DURATION);
+
 		Char ch = Actor.findChar( cell );
+
 		if (ch != null) {
+
+			emitParticle = true;
+
+			for (Buff buff : ch.buffs()) {
+				if(buff instanceof Burning) {
+					effectDuration /= 2;
+				}
+			}
+
 			if (Dungeon.level.water[ch.pos]){
-				Buff.prolong(ch, Frost.class, Frost.DURATION * 3);
+				Buff.prolong(ch, effect, effectDuration * 2);
 			} else {
-				Buff.prolong(ch, Frost.class, Frost.DURATION);
+				Buff.prolong(ch, effect, effectDuration);
 			}
 		}
 
@@ -143,7 +160,7 @@ public class Freezing extends Blob {
 			Sample.INSTANCE.play(Assets.Sounds.SHATTER);
 		}
 		
-		if (Dungeon.level.heroFOV[cell]) {
+		if (Dungeon.level.heroFOV[cell] && emitParticle) {
 			CellEmitter.get( cell ).start( SnowParticle.FACTORY, 0.2f, 6 );
 			return true;
 		} else {
